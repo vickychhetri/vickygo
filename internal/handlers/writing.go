@@ -85,7 +85,7 @@ var (
 //		return
 //	}
 //
-//	h.Render(w, "writing.html", "Writing", result)
+//	h.Render(w, "writing_list.html", "Writing", result)
 //}
 
 func (h WritingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +105,7 @@ func (h WritingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Render(w, "writing.html", "Writing", result)
+	h.Render(w, "writing_list.html", "Writing", result)
 }
 
 type WPPost struct {
