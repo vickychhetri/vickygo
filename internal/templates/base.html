@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+
+        <nav class="top-nav">
+
+            <a href="javascript:history.back()" class="nav-back" title="Back">
+                ←
+            </a>
+
+            <div class="nav-links">
+                <a href="/" title="Home">⌂</a>
+                <a href="/about/" title="About">ℹ</a>
+                <a href="/writings" title="Writing">✎</a>
+                <a href="/contact/" title="Contact">✉</a>
+            </div>
+
+        </nav>
+
+    </div>
+</header>
+
+<main class="site-main">
+    {{ template "content" . }}
+</main>
+
+<footer class="site-footer">
+    <p>© {{ .Year }} Vicky Chhetri · Built with Go</p>
+</footer>
+
+<canvas id="bg-canvas"></canvas>
+<script src="/static/js/bg.js"></script>
+
+</body>
+</html>

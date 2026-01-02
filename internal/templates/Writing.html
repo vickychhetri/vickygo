@@ -1,0 +1,52 @@
+{{ define "content" }}
+
+<section class="writing">
+
+    <header class="writing-header">
+        <h2>Writing</h2>
+        <p class="writing-subtitle">Notes on Go, backend systems, and engineering</p>
+    </header>
+
+    {{ if .Data.Posts }}
+    <ul class="post-list">
+        {{ range .Data.Posts }}
+        <li class="post-item">
+            <a href="/writing/{{ .Slug }}" class="post-link">
+                <span class="post-title">{{ .Title.Rendered }}</span>
+            </a>
+        </li>
+        {{ end }}
+    </ul>
+    {{ else }}
+    <p class="empty-state">No posts found.</p>
+    {{ end }}
+
+    <nav class="pagination" aria-label="Pagination">
+        <div class="pagination-inner">
+
+            {{ if gt .Data.Page 1 }}
+            <a class="page-link" href="/writings?page={{ sub .Data.Page 1 }}">
+                ← Previous
+            </a>
+            {{ else }}
+            <span class="page-link disabled">← Previous</span>
+            {{ end }}
+
+            <span class="page-status">
+				Page {{ .Data.Page }} of {{ .Data.TotalPages }}
+			</span>
+
+            {{ if lt .Data.Page .Data.TotalPages }}
+            <a class="page-link" href="/writings?page={{ add .Data.Page 1 }}">
+                Next →
+            </a>
+            {{ else }}
+            <span class="page-link disabled">Next →</span>
+            {{ end }}
+
+        </div>
+    </nav>
+
+</section>
+
+{{ end }}

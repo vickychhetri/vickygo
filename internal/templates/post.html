@@ -1,0 +1,15 @@
+{{ define "content" }}
+<article class="post">
+
+    <h1>{{ .Data.Post.Title.Rendered }}</h1>
+
+    <p class="post-date">
+        {{ .Data.Post.Date }}
+    </p>
+
+    <div class="post-body">
+        {{ .Data.Post.Content.Rendered | safeHTML  }}
+    </div>
+
+</article>
+{{ end }}
