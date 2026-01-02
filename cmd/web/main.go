@@ -73,7 +73,7 @@ func main() {
 	//})
 
 	// Collection route (important)
-	http.Handle("/writings", writingHandler)
+	//http.Handle("/writings", writingHandler)
 
 	// Collection route (important)
 	http.Handle("/writings/", writingHandler)
