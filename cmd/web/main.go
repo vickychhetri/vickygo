@@ -14,6 +14,42 @@ type PageData struct {
 	Data  any
 }
 
+//func render(w http.ResponseWriter, tmpl string, title string, data any) {
+//	t, err := template.New("base.html").
+//		Funcs(template.FuncMap{
+//			"safeHTML": func(s string) template.HTML {
+//				return template.HTML(s)
+//			},
+//			"add": func(a, b int) int {
+//				return a + b
+//			},
+//			"sub": func(a, b int) int {
+//				return a - b
+//			},
+//		}).
+//		ParseFiles(
+//			"internal/templates/base.html",
+//			"internal/templates/"+tmpl,
+//		)
+//
+//	if err != nil {
+//		log.Println(err)
+//		http.Error(w, "Template error", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	page := PageData{
+//		Title: title,
+//		Year:  time.Now().Year(),
+//		Data:  data,
+//	}
+//
+//	if err := t.Execute(w, page); err != nil {
+//		log.Println(err)
+//		http.Error(w, "Render error", http.StatusInternalServerError)
+//	}
+//}
+
 func render(w http.ResponseWriter, tmpl string, title string, data any) {
 	t, err := template.New("base.html").
 		Funcs(template.FuncMap{
@@ -44,7 +80,8 @@ func render(w http.ResponseWriter, tmpl string, title string, data any) {
 		Data:  data,
 	}
 
-	if err := t.Execute(w, page); err != nil {
+	// 🔴 THIS IS THE FIX
+	if err := t.ExecuteTemplate(w, "base.html", page); err != nil {
 		log.Println(err)
 		http.Error(w, "Render error", http.StatusInternalServerError)
 	}
