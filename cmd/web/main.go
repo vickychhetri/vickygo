@@ -66,12 +66,20 @@ func main() {
 	writingHandler := handlers.WritingHandler{
 		Render: render,
 	}
-	http.Handle("/writings", writingHandler)
 
+	// Canonical redirect
+	http.HandleFunc("/writings", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/writings/", http.StatusMovedPermanently)
+	})
+
+	// Collection route (important)
+	http.Handle("/writings/", writingHandler)
+
+	// Single post route (already correct)
 	http.Handle("/writing/", handlers.PostHandler{
 		Render: render,
 	})
 
-	log.Println("Listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Listening on :8082")
+	log.Fatal(http.ListenAndServe(":8082", nil))
 }
