@@ -68,8 +68,16 @@ func main() {
 	}
 
 	// Canonical redirect
-	http.HandleFunc("/writings", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/writings/", http.StatusMovedPermanently)
+	//http.HandleFunc("/writings", func(w http.ResponseWriter, r *http.Request) {
+	//	http.Redirect(w, r, "/writings/", http.StatusMovedPermanently)
+	//})
+
+	// Collection route (important)
+	http.Handle("/writings", writingHandler)
+
+	// Single post route (already correct)
+	http.Handle("/writing", handlers.PostHandler{
+		Render: render,
 	})
 
 	// Collection route (important)
