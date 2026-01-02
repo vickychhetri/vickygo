@@ -75,11 +75,6 @@ func main() {
 	// Collection route (important)
 	http.Handle("/writings", writingHandler)
 
-	// Single post route (already correct)
-	http.Handle("/writing", handlers.PostHandler{
-		Render: render,
-	})
-
 	// Collection route (important)
 	http.Handle("/writings/", writingHandler)
 
