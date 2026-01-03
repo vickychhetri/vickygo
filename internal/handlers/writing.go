@@ -68,26 +68,6 @@ var (
 	cacheTTL = 10 * time.Hour
 )
 
-//func (h WritingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-//
-//	page := 1
-//	if p := r.URL.Query().Get("page"); p != "" {
-//		if i, err := strconv.Atoi(p); err == nil && i > 0 {
-//			page = i
-//		}
-//	}
-//
-//	perPage := 50
-//
-//	result, err := fetchWPPosts(page, perPage)
-//	if err != nil {
-//		http.Error(w, "Failed to fetch posts", 500)
-//		return
-//	}
-//
-//	h.Render(w, "writinglist.html", "Writing", result)
-//}
-
 func (h WritingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	page := 1

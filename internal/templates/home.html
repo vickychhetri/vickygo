@@ -1,30 +1,100 @@
 {{ define "content" }}
 
-<section class="intro">
+<section class="circuit-board">
+    <div class="circuit-container">
+        <!-- Circuit lines in background -->
+        <div class="circuit-lines">
+            <svg viewBox="0 0 1000 400" class="circuit-svg">
+                <path d="M200,100 L400,100 L400,300 L600,300 L600,150" class="circuit-path" />
+                <path d="M300,200 L500,200 L500,350 L700,350" class="circuit-path" />
+                <circle cx="200" cy="100" r="8" class="circuit-node active" />
+                <circle cx="400" cy="100" r="8" class="circuit-node" />
+                <circle cx="400" cy="300" r="8" class="circuit-node active" />
+                <circle cx="600" cy="300" r="8" class="circuit-node" />
+                <circle cx="600" cy="150" r="8" class="circuit-node active" />
+            </svg>
+        </div>
 
-    <div class="profile">
-        <img src="/static/images/vicky_chhetri.jpg" alt="Vicky Chhetri"  style="width:200px;height:200px; border-radius:50%;"/>
+        <div class="circuit-content">
+            <div class="profile-chip">
+                <div class="chip-inner">
+                    <img src="/static/images/vicky_chhetri.jpg" alt="Vicky Chhetri" class="chip-photo" />
+                    <div class="chip-pins">
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="chip-label">VICKY CHHETRI </div>
+            </div>
+
+            <div class="specs-grid">
+                <div class="spec-card" data-spec="architecture">
+                    <h3 class="spec-title">ARCHITECTURE</h3>
+                    <p class="spec-value">Distributed Systems</p>
+                    <div class="spec-meter">
+                        <div class="meter-fill" style="width: 95%"></div>
+                    </div>
+                </div>
+
+                <div class="spec-card" data-spec="language">
+                    <h3 class="spec-title">LANGUAGE</h3>
+                    <p class="spec-value">Go / Golang</p>
+                    <div class="spec-meter">
+                        <div class="meter-fill" style="width: 98%"></div>
+                    </div>
+                </div>
+
+                <div class="spec-card" data-spec="reliability">
+                    <h3 class="spec-title">RELIABILITY</h3>
+                    <p class="spec-value">Production-Grade</p>
+                    <div class="spec-meter">
+                        <div class="meter-fill" style="width: 97%"></div>
+                    </div>
+                </div>
+
+                <div class="spec-card" data-spec="philosophy">
+                    <h3 class="spec-title">PHILOSOPHY</h3>
+                    <p class="spec-value">Simple & Boring Tech</p>
+                    <div class="spec-meter">
+                        <div class="meter-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="manifesto">
+                <h3 class="manifesto-title">// ENGINEERING MANIFESTO</h3>
+                <div class="manifesto-lines">
+                    <p><code>if</code> (complexity > threshold) { <code>refactor()</code>; }</p>
+                    <p><code>for</code> system <code>in</code> production { <code>ensure(stability)</code>; }</p>
+                    <p><code>return</code> reliable, maintainable, simple;</p>
+                </div>
+            </div>
+
+            <div class="port-connections">
+                <div class="port" data-port="github">
+                    <span class="port-label">GITHUB</span>
+                    <a href="https://github.com/vickychhetri" class="port-link">vickychhetri</a>
+                </div>
+                <div class="port" data-port="writing">
+                    <span class="port-label">WRITING</span>
+                    <a href="/writings/" class="port-link">/engineering</a>
+                </div>
+                <div class="port" data-port="project">
+                    <span class="port-label">ACTIVE_PROJ</span>
+                    <a href="https://github.com/vickychhetri/pheri" class="port-link">pheri</a>
+                </div>
+                <div class="port" data-port="contact">
+                    <span class="port-label">CONTACT</span>
+                    <a href="mailto:vickychhetri4@gmail.com" class="port-link">vickychhetri4@gmail.com</a>
+                </div>
+            </div>
+
+            <div class="system-status">
+                <span class="status-indicator active"></span>
+                <span class="status-text">SYSTEM: ONLINE • LATENCY: &lt;5ms • UPTIME: 99.99%</span>
+            </div>
+        </div>
     </div>
-
-    <h1>Vicky Chhetri</h1>
-
-    <p class="role">
-        Senior Backend Engineer · Go / Distributed Systems
-    </p>
-
-    <p class="about">
-        I design and build reliable backend systems with Go.
-        I prefer simple architectures, boring technology,
-        and code that survives production.
-    </p>
-
-    <ul class="links">
-        <li><a href="https://github.com/vickychhetri">GitHub</a></li>
-        <li><a href="/writings/">Writing</a></li>
-        <li><a href="https://github.com/vickychhetri/pheri">Current-Project</a></li>
-        <li><a href="mailto:vickychhetri4@gmail.com">Email</a></li>
-    </ul>
-
 </section>
 
 {{ end }}

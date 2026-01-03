@@ -6,25 +6,25 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-
 <header class="site-header">
     <div class="header-inner">
-
         <nav class="top-nav">
-
-            <a href="javascript:history.back()" class="nav-back" title="Back">
+            <a href="javascript:history.back()" class="nav-back" title="Back" aria-label="Go back">
                 ←
             </a>
 
             <div class="nav-links">
-                <a href="/" title="Home">⌂</a>
-                <a href="/about/" title="About">ℹ</a>
-                <a href="/writings" title="Writing">✎</a>
-                <a href="/contact/" title="Contact">✉</a>
+                <a href="/" title="Home" aria-label="Home">⌂</a>
+                <a href="/about/" title="About" aria-label="About">ℹ</a>
+                <a href="/writings" title="Writing" aria-label="Writing">✎</a>
+                <a href="/contact/" title="Contact" aria-label="Contact">✉</a>
             </div>
 
+            <!-- Optional mobile menu toggle for very small screens -->
+            <button class="mobile-menu-toggle" aria-label="Menu" hidden>
+                ☰
+            </button>
         </nav>
-
     </div>
 </header>
 
@@ -39,5 +39,23 @@
 <canvas id="bg-canvas"></canvas>
 <script src="/static/js/bg.js"></script>
 
+<script>
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('show');
+            }
+        });
+    }
+</script>
 </body>
 </html>
