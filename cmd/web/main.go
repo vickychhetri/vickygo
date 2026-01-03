@@ -70,7 +70,7 @@ func render(w http.ResponseWriter, tmpl string, title string, data any) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Template error", http.StatusInternalServerError)
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
