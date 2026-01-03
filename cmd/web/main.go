@@ -70,7 +70,11 @@ func render(w http.ResponseWriter, tmpl string, title string, data any) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+		http.Error(
+			w,
+			"Template execution failed: "+err.Error(),
+			http.StatusInternalServerError,
+		)
 		return
 	}
 
@@ -80,7 +84,6 @@ func render(w http.ResponseWriter, tmpl string, title string, data any) {
 		Data:  data,
 	}
 
-	// 🔴 THIS IS THE FIX
 	if err := t.ExecuteTemplate(w, "base.html", page); err != nil {
 		log.Println(err)
 		http.Error(w, "Render error", http.StatusInternalServerError)
@@ -105,15 +108,15 @@ func main() {
 	}
 
 	// Canonical redirect
-	//http.HandleFunc("/writings", func(w http.ResponseWriter, r *http.Request) {
-	//	http.Redirect(w, r, "/writings/", http.StatusMovedPermanently)
-	//})
+	http.HandleFunc("/writings", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/writings/", http.StatusMovedPermanently)
+	})
 
 	// Collection route (important)
 	//http.Handle("/writings", writingHandler)
 
 	// Collection route (important)
-	http.Handle("/writings", writingHandler)
+	http.Handle("/writings/", writingHandler)
 
 	// Single post route (already correct)
 	http.Handle("/writing/", handlers.PostHandler{
