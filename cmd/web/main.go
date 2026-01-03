@@ -113,7 +113,7 @@ func main() {
 	//http.Handle("/writings", writingHandler)
 
 	// Collection route (important)
-	http.Handle("/writings/", writingHandler)
+	http.Handle("/writings", writingHandler)
 
 	// Single post route (already correct)
 	http.Handle("/writing/", handlers.PostHandler{
