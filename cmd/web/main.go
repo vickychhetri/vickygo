@@ -14,42 +14,6 @@ type PageData struct {
 	Data  any
 }
 
-//func render(w http.ResponseWriter, tmpl string, title string, data any) {
-//	t, err := template.New("base.html").
-//		Funcs(template.FuncMap{
-//			"safeHTML": func(s string) template.HTML {
-//				return template.HTML(s)
-//			},
-//			"add": func(a, b int) int {
-//				return a + b
-//			},
-//			"sub": func(a, b int) int {
-//				return a - b
-//			},
-//		}).
-//		ParseFiles(
-//			"internal/templates/base.html",
-//			"internal/templates/"+tmpl,
-//		)
-//
-//	if err != nil {
-//		log.Println(err)
-//		http.Error(w, "Template error", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	page := PageData{
-//		Title: title,
-//		Year:  time.Now().Year(),
-//		Data:  data,
-//	}
-//
-//	if err := t.Execute(w, page); err != nil {
-//		log.Println(err)
-//		http.Error(w, "Render error", http.StatusInternalServerError)
-//	}
-//}
-
 func render(w http.ResponseWriter, tmpl string, title string, data any) {
 	t, err := template.New("base.html").
 		Funcs(template.FuncMap{
@@ -98,9 +62,16 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "home.html", "Home", nil)
 	})
+	http.HandleFunc("/go-cheat-sheet/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "gocheatsheet.html", "Go Cheat Sheet", nil)
+	})
 
-	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "about.html", "About", nil)
+	http.HandleFunc("/git-cheat-sheet/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "gitcheatsheet.html", "Git Cheat Sheet", nil)
+	})
+
+	http.HandleFunc("/distributed-universe/", func(w http.ResponseWriter, r *http.Request) {
+		renderUniverse(w, "distributed-universe.html", "Distributed System Universe", nil)
 	})
 
 	writingHandler := handlers.WritingHandler{
@@ -116,4 +87,44 @@ func main() {
 
 	log.Println("Listening on :8082")
 	log.Fatal(http.ListenAndServe(":8082", nil))
+}
+
+func renderUniverse(w http.ResponseWriter, tmpl string, title string, data any) {
+	t, err := template.New("layout.html").
+		Funcs(template.FuncMap{
+			"safeHTML": func(s string) template.HTML {
+				return template.HTML(s)
+			},
+			"add": func(a, b int) int {
+				return a + b
+			},
+			"sub": func(a, b int) int {
+				return a - b
+			},
+		}).
+		ParseFiles(
+			"internal/templates/layout.html",
+			"internal/templates/"+tmpl,
+		)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(
+			w,
+			"Template execution failed: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	page := PageData{
+		Title: title,
+		Year:  time.Now().Year(),
+		Data:  data,
+	}
+
+	if err := t.ExecuteTemplate(w, "layout.html", page); err != nil {
+		log.Println(err)
+		http.Error(w, "Render error", http.StatusInternalServerError)
+	}
 }

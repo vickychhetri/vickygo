@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/distributed-universe.css">
+</head>
+<body class="universe-mode">
+<header class="site-header">
+    <div class="header-inner">
+        <nav class="top-nav">
+            <a href="javascript:history.back()" class="nav-back" title="Back" aria-label="Go back">
+                ←
+            </a>
+
+            <div class="nav-links">
+                <a href="/" title="Home" aria-label="Home">[ HOME ]</a>
+                <a href="/distributed-universe/" class="active" title="Distributed Systems Universe" aria-label="Distributed Systems">[ DISTRIBUTED UNIVERSE ]</a>
+                <a href="/go-cheat-sheet/" title="Go Cheat Sheet" aria-label="Go">[ Go ]</a>
+                <a href="/git-cheat-sheet/" title="Git Cheat Sheet" aria-label="Git">[ GIT ]</a>
+            </div>
+
+            <button class="universe-controls-toggle" id="controlsToggle" aria-label="Show Controls">
+                ⚙️
+            </button>
+        </nav>
+    </div>
+</header>
+
+<main class="site-main universe-container">
+    {{ template "content" . }}
+</main>
+
+<!-- Control Panel -->
+<div class="universe-controls" id="universeControls">
+    <div class="controls-header">
+        <h3>🌌 Distributed Systems Universe</h3>
+        <button class="close-controls" id="closeControls">×</button>
+    </div>
+
+    <div class="controls-section">
+        <h4>Visualization Settings</h4>
+        <div class="control-group">
+            <label for="speedControl">Rotation Speed:</label>
+            <input type="range" id="speedControl" min="0.1" max="2" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label for="particleControl">Particle Density:</label>
+            <input type="range" id="particleControl" min="10" max="100" step="10" value="50">
+        </div>
+
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="showConnections" checked>
+                Show Network Connections
+            </label>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <h4>Filter Concepts</h4>
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="consensus">Consensus</button>
+            <button class="filter-btn" data-filter="storage">Storage</button>
+            <button class="filter-btn" data-filter="messaging">Messaging</button>
+            <button class="filter-btn" data-filter="coordination">Coordination</button>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <h4>Learning Mode</h4>
+        <div class="control-group">
+            <button id="tourBtn" class="action-btn">🎓 Start Guided Tour</button>
+            <button id="quizBtn" class="action-btn">❓ Quick Quiz</button>
+        </div>
+    </div>
+</div>
+
+<!-- Knowledge Panel -->
+<div class="knowledge-panel" id="knowledgePanel">
+    <div class="knowledge-header">
+        <h3 id="conceptTitle"></h3>
+        <button class="close-knowledge" id="closeKnowledge">×</button>
+    </div>
+    <div class="knowledge-content" id="conceptContent">
+        <!-- Content loaded dynamically -->
+    </div>
+    <div class="knowledge-footer">
+        <div class="difficulty">
+            <span class="diff-label">Difficulty:</span>
+            <span class="diff-stars" id="difficultyStars"></span>
+        </div>
+        <div class="related-concepts">
+            <strong>Related:</strong> <span id="relatedConcepts"></span>
+        </div>
+    </div>
+</div>
+
+<canvas id="universe-canvas"></canvas>
+
+<script src="/static/js/distributed-universe.js"></script>
+<script>
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('show');
+            }
+        });
+    }
+
+    // Controls toggle
+    document.getElementById('controlsToggle').addEventListener('click', () => {
+        document.getElementById('universeControls').classList.toggle('visible');
+    });
+
+    document.getElementById('closeControls').addEventListener('click', () => {
+        document.getElementById('universeControls').classList.remove('visible');
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,733 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #58a6ff;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .git-logo {
+            color: #f1502f;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background-color: #010409;
+            color: #c9d1d9;
+            font-size: 1rem;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            background-color: #30363d;
+        }
+
+        .tab-btn.active {
+            background-color: #1f6feb;
+            border-color: #1f6feb;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-title {
+            color: #58a6ff;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .command-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .command-card:hover {
+            transform: translateY(-3px);
+            border-color: #58a6ff;
+        }
+
+        .command-title {
+            color: #58a6ff;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .command-title i {
+            color: #f1502f;
+        }
+
+        .command-code {
+            background-color: #0d1117;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 3px solid #f1502f;
+            overflow-x: auto;
+        }
+
+        .command-desc {
+            color: #8b949e;
+            font-size: 0.95rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #1f6feb;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .back-to-top:hover {
+            background-color: #58a6ff;
+            transform: translateY(-3px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+            color: #8b949e;
+        }
+
+        .highlight {
+            background-color: rgba(88, 166, 255, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .tab-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+<div class="container">
+    <header>
+        <div class="git-logo">
+            <i class="fab fa-git-alt"></i>
+        </div>
+        <h1>Git Cheatsheet</h1>
+        <p class="subtitle">Complete reference guide for all Git commands and workflows</p>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for a command or topic...">
+        </div>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="setup">Setup & Config</button>
+        <button class="tab-btn" data-tab="basics">Basic Commands</button>
+        <button class="tab-btn" data-tab="branching">Branching</button>
+        <button class="tab-btn" data-tab="merging">Merging & Rebasing</button>
+        <button class="tab-btn" data-tab="remote">Remote Repos</button>
+        <button class="tab-btn" data-tab="stashing">Stashing</button>
+        <button class="tab-btn" data-tab="inspection">Inspection</button>
+        <button class="tab-btn" data-tab="advanced">Advanced</button>
+    </div>
+
+    <!-- Setup & Configuration Section -->
+    <section id="setup" class="content-section active">
+        <h2 class="section-title">Setup & Configuration</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-cog"></i> Set User Name</h3>
+                <div class="command-code">git config --global user.name "Your Name"</div>
+                <p class="command-desc">Sets the name that will be attached to your commits.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-envelope"></i> Set User Email</h3>
+                <div class="command-code">git config --global user.email "email@example.com"</div>
+                <p class="command-desc">Sets the email that will be attached to your commits.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-palette"></i> Set Default Editor</h3>
+                <div class="command-code">git config --global core.editor "code --wait"</div>
+                <p class="command-desc">Sets VS Code as the default editor for Git messages.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-list"></i> View Configuration</h3>
+                <div class="command-code">git config --list</div>
+                <p class="command-desc">Lists all Git configuration settings.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-key"></i> Set Credential Helper</h3>
+                <div class="command-code">git config --global credential.helper cache</div>
+                <p class="command-desc">Caches credentials in memory for a short time (default 15 minutes).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-check-circle"></i> Set Auto CRLF Handling</h3>
+                <div class="command-code">git config --global core.autocrlf true</div>
+                <p class="command-desc">Automatically handles line endings (Windows). Use <span class="highlight">input</span> for Linux/Mac.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Basic Commands Section -->
+    <section id="basics" class="content-section">
+        <h2 class="section-title">Basic Commands</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-folder-plus"></i> Initialize Repository</h3>
+                <div class="command-code">git init</div>
+                <p class="command-desc">Creates a new Git repository in the current directory.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-clone"></i> Clone Repository</h3>
+                <div class="command-code">git clone &lt;repository-url&gt;</div>
+                <p class="command-desc">Creates a local copy of a remote repository.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-plus"></i> Add Files to Staging</h3>
+                <div class="command-code">git add &lt;file&gt;</div>
+                <p class="command-desc">Adds a specific file to the staging area. Use <span class="highlight">.</span> to add all files.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-check"></i> Commit Changes</h3>
+                <div class="command-code">git commit -m "Commit message"</div>
+                <p class="command-desc">Records changes to the repository with a descriptive message.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-history"></i> View Status</h3>
+                <div class="command-code">git status</div>
+                <p class="command-desc">Shows the state of the working directory and staging area.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-undo"></i> Restore File</h3>
+                <div class="command-code">git restore &lt;file&gt;</div>
+                <p class="command-desc">Discards changes in working directory (Git 2.23+).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-branch"></i> View Commit History</h3>
+                <div class="command-code">git log --oneline --graph --all</div>
+                <p class="command-desc">Shows commit history in a compact, graphical format.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-search"></i> View Changes</h3>
+                <div class="command-code">git diff</div>
+                <p class="command-desc">Shows unstaged changes since last commit.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Branching Section -->
+    <section id="branching" class="content-section">
+        <h2 class="section-title">Branching</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-branch"></i> List Branches</h3>
+                <div class="command-code">git branch</div>
+                <p class="command-desc">Lists all local branches. Add <span class="highlight">-a</span> to show all branches including remote.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-plus-circle"></i> Create Branch</h3>
+                <div class="command-code">git branch &lt;branch-name&gt;</div>
+                <p class="command-desc">Creates a new branch from the current HEAD.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-exchange-alt"></i> Switch Branch</h3>
+                <div class="command-code">git checkout &lt;branch-name&gt;</div>
+                <p class="command-desc">Switches to the specified branch.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-bolt"></i> Create & Switch Branch</h3>
+                <div class="command-code">git checkout -b &lt;branch-name&gt;</div>
+                <p class="command-desc">Creates a new branch and switches to it immediately.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-trash-alt"></i> Delete Branch</h3>
+                <div class="command-code">git branch -d &lt;branch-name&gt;</div>
+                <p class="command-desc">Deletes the specified branch (safe delete). Use <span class="highlight">-D</span> for force delete.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-sync-alt"></i> Rename Branch</h3>
+                <div class="command-code">git branch -m &lt;new-branch-name&gt;</div>
+                <p class="command-desc">Renames the current branch.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-map-marker-alt"></i> Track Remote Branch</h3>
+                <div class="command-code">git branch -u origin/&lt;branch-name&gt;</div>
+                <p class="command-desc">Sets up tracking relationship with a remote branch.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Merging & Rebasing Section -->
+    <section id="merging" class="content-section">
+        <h2 class="section-title">Merging & Rebasing</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-merge"></i> Merge Branch</h3>
+                <div class="command-code">git merge &lt;branch-name&gt;</div>
+                <p class="command-desc">Merges the specified branch into the current branch.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-history"></i> Rebase Branch</h3>
+                <div class="command-code">git rebase &lt;branch-name&gt;</div>
+                <p class="command-desc">Reapplies commits on top of another base branch.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-exclamation-circle"></i> Abort Rebase</h3>
+                <div class="command-code">git rebase --abort</div>
+                <p class="command-desc">Cancels an ongoing rebase operation.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-step-forward"></i> Continue Rebase</h3>
+                <div class="command-code">git rebase --continue</div>
+                <p class="command-desc">Continues a rebase after resolving conflicts.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-flag-checkered"></i> Squash Commits</h3>
+                <div class="command-code">git rebase -i HEAD~n</div>
+                <p class="command-desc">Interactive rebase to squash last n commits.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-exclamation-triangle"></i> Abort Merge</h3>
+                <div class="command-code">git merge --abort</div>
+                <p class="command-desc">Cancels an ongoing merge operation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Remote Repositories Section -->
+    <section id="remote" class="content-section">
+        <h2 class="section-title">Remote Repositories</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-network-wired"></i> List Remotes</h3>
+                <div class="command-code">git remote -v</div>
+                <p class="command-desc">Lists all remote repositories with their URLs.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-link"></i> Add Remote</h3>
+                <div class="command-code">git remote add origin &lt;url&gt;</div>
+                <p class="command-desc">Adds a new remote repository with the name "origin".</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-cloud-download-alt"></i> Fetch from Remote</h3>
+                <div class="command-code">git fetch origin</div>
+                <p class="command-desc">Downloads objects and refs from remote repository without merging.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-download"></i> Pull from Remote</h3>
+                <div class="command-code">git pull origin &lt;branch&gt;</div>
+                <p class="command-desc">Fetches and merges changes from a remote branch.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-upload"></i> Push to Remote</h3>
+                <div class="command-code">git push origin &lt;branch&gt;</div>
+                <p class="command-desc">Uploads local branch commits to the remote repository.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-unlink"></i> Remove Remote</h3>
+                <div class="command-code">git remote remove origin</div>
+                <p class="command-desc">Removes the remote named "origin".</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-sync"></i> Update Remote URL</h3>
+                <div class="command-code">git remote set-url origin &lt;new-url&gt;</div>
+                <p class="command-desc">Changes the URL for the remote named "origin".</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-branch"></i> Track Remote Branch</h3>
+                <div class="command-code">git checkout -b &lt;branch&gt; origin/&lt;branch&gt;</div>
+                <p class="command-desc">Creates a local branch that tracks a remote branch.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stashing Section -->
+    <section id="stashing" class="content-section">
+        <h2 class="section-title">Stashing</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-archive"></i> Stash Changes</h3>
+                <div class="command-code">git stash</div>
+                <p class="command-desc">Temporarily stores modified tracked files.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-archive"></i> Stash with Message</h3>
+                <div class="command-code">git stash save "message"</div>
+                <p class="command-desc">Stashes changes with a descriptive message.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-clipboard-list"></i> List Stashes</h3>
+                <div class="command-code">git stash list</div>
+                <p class="command-desc">Lists all stashed changesets.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-box-open"></i> Apply Stash</h3>
+                <div class="command-code">git stash apply</div>
+                <p class="command-desc">Applies the most recent stash without removing it from stash list.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-box-open"></i> Pop Stash</h3>
+                <div class="command-code">git stash pop</div>
+                <p class="command-desc">Applies and removes the most recent stash from the stash list.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-trash-alt"></i> Drop Stash</h3>
+                <div class="command-code">git stash drop stash@{n}</div>
+                <p class="command-desc">Deletes the stash at index n.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-broom"></i> Clear Stash</h3>
+                <div class="command-code">git stash clear</div>
+                <p class="command-desc">Removes all stashed entries.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inspection & Comparison Section -->
+    <section id="inspection" class="content-section">
+        <h2 class="section-title">Inspection & Comparison</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-history"></i> View Commit Log</h3>
+                <div class="command-code">git log --oneline -10</div>
+                <p class="command-desc">Shows the last 10 commits in a compact format.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-search"></i> View Changes Between Commits</h3>
+                <div class="command-code">git diff &lt;commit1&gt; &lt;commit2&gt;</div>
+                <p class="command-desc">Shows changes between two commits.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-file-alt"></i> Show Commit Details</h3>
+                <div class="command-code">git show &lt;commit&gt;</div>
+                <p class="command-desc">Shows information about a specific commit.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-branch"></i> View Branch History</h3>
+                <div class="command-code">git log --graph --all --oneline</div>
+                <p class="command-desc">Shows a graphical representation of branch history.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-filter"></i> Search Commit Messages</h3>
+                <div class="command-code">git log --grep="search term"</div>
+                <p class="command-desc">Filters commits by message content.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-user-check"></i> View Commits by Author</h3>
+                <div class="command-code">git log --author="name"</div>
+                <p class="command-desc">Shows commits by a specific author.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-file-invoice"></i> View File History</h3>
+                <div class="command-code">git log -p &lt;file&gt;</div>
+                <p class="command-desc">Shows commit history with changes for a specific file.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-calendar-alt"></i> View Commits by Date</h3>
+                <div class="command-code">git log --since="2 weeks ago"</div>
+                <p class="command-desc">Shows commits from the last 2 weeks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Commands Section -->
+    <section id="advanced" class="content-section">
+        <h2 class="section-title">Advanced Commands</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-undo"></i> Undo Last Commit</h3>
+                <div class="command-code">git reset --soft HEAD~1</div>
+                <p class="command-desc">Undoes the last commit but keeps changes staged.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-eraser"></i> Hard Reset</h3>
+                <div class="command-code">git reset --hard HEAD~1</div>
+                <p class="command-desc">Completely removes the last commit and all changes.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-redo"></i> Revert Commit</h3>
+                <div class="command-code">git revert &lt;commit&gt;</div>
+                <p class="command-desc">Creates a new commit that undoes the changes of a previous commit.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-search"></i> Find by Hash</h3>
+                <div class="command-code">git show &lt;commit-hash&gt;</div>
+                <p class="command-desc">Shows information about a specific commit using its hash.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-tags"></i> Create Tag</h3>
+                <div class="command-code">git tag -a v1.0 -m "Version 1.0"</div>
+                <p class="command-desc">Creates an annotated tag for a release point.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-list-alt"></i> List Tags</h3>
+                <div class="command-code">git tag -l</div>
+                <p class="command-desc">Lists all tags in the repository.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-compress-alt"></i> Clean Untracked Files</h3>
+                <div class="command-code">git clean -fd</div>
+                <p class="command-desc">Removes untracked files and directories. Use with caution!</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-bug"></i> Bisect for Debugging</h3>
+                <div class="command-code">git bisect start<br>git bisect bad<br>git bisect good &lt;commit&gt;</div>
+                <p class="command-desc">Binary search to find the commit that introduced a bug.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Git Cheatsheet &copy; 2023 | Complete reference for developers</p>
+        <p>Remember: <span class="highlight">git status</span> is your best friend when you're unsure about the current state!</p>
+    </footer>
+</div>
+
+<div class="back-to-top" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
+<script>
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Update active tab button
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Show target content section
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetTab) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+
+        contentSections.forEach(section => {
+            const commandCards = section.querySelectorAll('.command-card');
+            let sectionHasMatch = false;
+
+            commandCards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                const isVisible = cardText.includes(searchTerm);
+
+                card.style.display = isVisible ? 'block' : 'none';
+
+                if (isVisible) {
+                    sectionHasMatch = true;
+                }
+            });
+
+            // Show/hide section based on matches
+            if (sectionHasMatch) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // If search is cleared, show all content
+        if (searchTerm === '') {
+            contentSections.forEach(section => {
+                section.style.display = 'block';
+                const commandCards = section.querySelectorAll('.command-card');
+                commandCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+            });
+        }
+    });
+
+    // Back to top functionality
+    const backToTopButton = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTopButton.style.display = 'flex';
+        } else {
+            backToTopButton.style.display = 'none';
+        }
+    });
+
+    backToTopButton.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+</script>
+ {{end}}

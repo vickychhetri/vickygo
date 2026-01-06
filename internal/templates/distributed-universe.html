@@ -1,0 +1,68 @@
+{{ define "content" }}
+<div class="universe-intro">
+    <h1 class="universe-title">🌌 Distributed Systems Universe</h1>
+    <p class="universe-subtitle">Explore the concepts, patterns, and technologies that power distributed systems</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">14</div>
+            <div class="stat-label">Core Concepts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">6</div>
+            <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Interconnections</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Interactive</div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>How to Explore:</h3>
+        <ul>
+            <li>🎯 <strong>Click</strong> on any floating concept to learn about it</li>
+            <li>🔗 <strong>Hover</strong> to see connections between concepts</li>
+            <li>⚙️ Use the <strong>control panel</strong> (top-right ⚙️) to customize your view</li>
+            <li>🎓 Take a <strong>guided tour</strong> for a structured learning path</li>
+            <li>🖱️ <strong>Move your mouse</strong> to see parallax effects</li>
+        </ul>
+    </div>
+</div>
+
+<div class="concept-categories">
+    <h3>Concept Categories:</h3>
+    <div class="category-tags">
+        <span class="category-tag consensus">Consensus Algorithms</span>
+        <span class="category-tag storage">Distributed Storage</span>
+        <span class="category-tag messaging">Messaging Systems</span>
+        <span class="category-tag coordination">Service Coordination</span>
+        <span class="category-tag architecture">System Architecture</span>
+        <span class="category-tag patterns">Design Patterns</span>
+    </div>
+</div>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Initializing Distributed Universe...</h3>
+        <p>Loading concepts and creating connections</p>
+        <div class="loading-progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show loading screen initially
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }, 2000);
+    });
+</script>
+{{ end }}

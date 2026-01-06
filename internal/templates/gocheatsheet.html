@@ -1,0 +1,2065 @@
+{{ define "content" }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --go-blue: #00add8;
+            --go-dark: #2d3436;
+            --go-light: #f8f9fa;
+            --go-gray: #6c757d;
+            --go-success: #28a745;
+            --go-warning: #ffc107;
+            --go-danger: #dc3545;
+            --code-bg: #1e1e1e;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: var(--go-blue);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .go-logo {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: var(--go-blue);
+            filter: drop-shadow(0 0 8px rgba(0, 173, 216, 0.3));
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 50px 14px 20px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--go-blue);
+            box-shadow: 0 0 0 3px rgba(0, 173, 216, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--go-blue);
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            background-color: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background-color: #334155;
+            border: none;
+            border-radius: 6px;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background-color: var(--go-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 173, 216, 0.3);
+        }
+
+        .content-section {
+            display: none;
+            margin-bottom: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-title {
+            color: var(--go-blue);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .command-card {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .command-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--go-blue);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .command-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--go-blue);
+        }
+
+        .command-title {
+            color: var(--go-blue);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .command-title i {
+            color: var(--go-blue);
+            font-size: 1.2rem;
+        }
+
+        .command-code {
+            background-color: var(--code-bg);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            margin: 15px 0;
+            border-left: 4px solid var(--go-blue);
+            overflow-x: auto;
+            font-size: 0.95rem;
+            color: #d4d4d4;
+            line-height: 1.5;
+        }
+
+        .command-code .keyword {
+            color: #569cd6;
+        }
+
+        .command-code .type {
+            color: #4ec9b0;
+        }
+
+        .command-code .string {
+            color: #ce9178;
+        }
+
+        .command-code .comment {
+            color: #6a9955;
+        }
+
+        .command-code .function {
+            color: #dcdcaa;
+        }
+
+        .command-desc {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--go-blue);
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 15px rgba(0, 173, 216, 0.3);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-to-top:hover {
+            background-color: #00c7ff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 173, 216, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #334155;
+            margin-top: 40px;
+            color: #94a3b8;
+            background-color: #1e293b;
+            border-radius: 10px;
+        }
+
+        .highlight {
+            background-color: rgba(0, 173, 216, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #7dd3fc;
+            font-weight: 500;
+        }
+
+        .note {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid var(--go-warning);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .note-title {
+            color: var(--go-warning);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .quick-link {
+            background-color: #334155;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .quick-link:hover {
+            background-color: var(--go-blue);
+            color: white;
+        }
+
+        @media (max-width: 1100px) {
+            .command-grid {
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .tab-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .go-logo {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="go-logo">
+            <i class="fab fa-golang"></i>
+        </div>
+        <h1>Go (Golang) Cheatsheet</h1>
+        <p class="subtitle">Complete reference guide for Go programming language - Syntax, Concurrency, Standard Library, and Best Practices</p>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for Go concepts, syntax, or examples...">
+            <div class="search-icon">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <a href="https://go.dev/" target="_blank" class="quick-link">Official Go Website</a>
+            <a href="https://pkg.go.dev/std" target="_blank" class="quick-link">Standard Library</a>
+            <a href="https://go.dev/doc/effective_go" target="_blank" class="quick-link">Effective Go</a>
+            <a href="https://tour.golang.org/" target="_blank" class="quick-link">Go Tour</a>
+            <a href="https://github.com/golang/go" target="_blank" class="quick-link">GitHub Repository</a>
+        </div>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="basics">
+            <i class="fas fa-code"></i> Basics & Syntax
+        </button>
+        <button class="tab-btn" data-tab="data">
+            <i class="fas fa-database"></i> Data Types
+        </button>
+        <button class="tab-btn" data-tab="control">
+            <i class="fas fa-project-diagram"></i> Control Flow
+        </button>
+        <button class="tab-btn" data-tab="functions">
+            <i class="fas fa-cogs"></i> Functions
+        </button>
+        <button class="tab-btn" data-tab="structs">
+            <i class="fas fa-cube"></i> Structs & Interfaces
+        </button>
+        <button class="tab-btn" data-tab="concurrency">
+            <i class="fas fa-bolt"></i> Concurrency
+        </button>
+        <button class="tab-btn" data-tab="collections">
+            <i class="fas fa-layer-group"></i> Collections
+        </button>
+        <button class="tab-btn" data-tab="stdlib">
+            <i class="fas fa-book"></i> Standard Library
+        </button>
+    </div>
+
+    <!-- Basics & Syntax Section -->
+    <section id="basics" class="content-section active">
+        <h2 class="section-title"><i class="fas fa-code"></i> Basics & Syntax</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-file-code"></i> Hello World</h3>
+                <div class="command-code">
+                    <span class="keyword">package</span> main<br>
+                    <br>
+                    <span class="keyword">import</span> <span class="string">"fmt"</span><br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;fmt.<span class="function">Println</span>(<span class="string">"Hello, World!"</span>)<br>
+                    }
+                </div>
+                <p class="command-desc">Basic Go program structure. Every executable Go program must have a main package and main function.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-box"></i> Package Declaration</h3>
+                <div class="command-code">
+                    <span class="comment">// Declare package name</span><br>
+                    <span class="keyword">package</span> main<br>
+                    <br>
+                    <span class="comment">// Import multiple packages</span><br>
+                    <span class="keyword">import</span> (<br>
+                    &nbsp;&nbsp;<span class="string">"fmt"</span><br>
+                    &nbsp;&nbsp;<span class="string">"math"</span><br>
+                    &nbsp;&nbsp;<span class="string">"strings"</span><br>
+                    )
+                </div>
+                <p class="command-desc">Package declaration and imports. Use grouped import syntax for cleaner code.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-variable"></i> Variable Declaration</h3>
+                <div class="command-code">
+                    <span class="comment">// Explicit type declaration</span><br>
+                    <span class="keyword">var</span> name <span class="type">string</span> = <span class="string">"Go"</span><br>
+                    <br>
+                    <span class="comment">// Type inference</span><br>
+                    <span class="keyword">var</span> version = <span class="string">"1.21"</span><br>
+                    <br>
+                    <span class="comment">// Short declaration (inside functions)</span><br>
+                    count := 10<br>
+                    <br>
+                    <span class="comment">// Multiple variables</span><br>
+                    <span class="keyword">var</span> x, y <span class="type">int</span> = 1, 2<br>
+                    a, b := <span class="string">"hello"</span>, <span class="string">"world"</span>
+                </div>
+                <p class="command-desc">Different ways to declare variables in Go. Short declaration (:=) can only be used inside functions.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-calculator"></i> Constants</h3>
+                <div class="command-code">
+                    <span class="comment">// Basic constant</span><br>
+                    <span class="keyword">const</span> Pi = 3.14159<br>
+                    <br>
+                    <span class="comment">// Typed constant</span><br>
+                    <span class="keyword">const</span> MaxSize <span class="type">int</span> = 1024<br>
+                    <br>
+                    <span class="comment">// Multiple constants</span><br>
+                    <span class="keyword">const</span> (<br>
+                    &nbsp;&nbsp;StatusOK = 200<br>
+                    &nbsp;&nbsp;StatusNotFound = 404<br>
+                    )<br>
+                    <br>
+                    <span class="comment">// Iota for enumerated constants</span><br>
+                    <span class="keyword">const</span> (<br>
+                    &nbsp;&nbsp;Red = <span class="keyword">iota</span>  <span class="comment">// 0</span><br>
+                    &nbsp;&nbsp;Green        <span class="comment">// 1</span><br>
+                    &nbsp;&nbsp;Blue         <span class="comment">// 2</span><br>
+                    )
+                </div>
+                <p class="command-desc">Constants are immutable values. Iota creates incrementing constants starting from 0.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-comment"></i> Comments</h3>
+                <div class="command-code">
+                    <span class="comment">// Single line comment</span><br>
+                    <br>
+                    <span class="comment">/*<br>
+Multi-line<br>
+comment<br>
+*/</span><br>
+                    <br>
+                    <span class="comment">// Documentation comment (for godoc)</span><br>
+                    <span class="comment">// Package math provides basic constants<br>
+// and mathematical functions.</span>
+                </div>
+                <p class="command-desc">Go supports single-line and multi-line comments. Comments starting with // are used by godoc for documentation.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-arrow-right"></i> Zero Values</h3>
+                <div class="command-code">
+                    <span class="keyword">var</span> i <span class="type">int</span>     <span class="comment">// 0</span><br>
+                    <span class="keyword">var</span> f <span class="type">float64</span> <span class="comment">// 0.0</span><br>
+                    <span class="keyword">var</span> b <span class="type">bool</span>    <span class="comment">// false</span><br>
+                    <span class="keyword">var</span> s <span class="type">string</span>  <span class="comment">// ""</span><br>
+                    <span class="keyword">var</span> p *<span class="type">int</span>    <span class="comment">// nil</span><br>
+                    <span class="keyword">var</span> sl []<span class="type">int</span>  <span class="comment">// nil</span><br>
+                    <span class="keyword">var</span> m <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span> <span class="comment">// nil</span>
+                </div>
+                <p class="command-desc">Default values for uninitialized variables in Go. This prevents undefined behavior.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Types Section -->
+    <section id="data" class="content-section">
+        <h2 class="section-title"><i class="fas fa-database"></i> Data Types</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-hashtag"></i> Basic Types</h3>
+                <div class="command-code">
+                    <span class="comment">// Integer types</span><br>
+                    <span class="keyword">var</span> i <span class="type">int</span>     <span class="comment">// Platform-dependent (32 or 64 bits)</span><br>
+                    <span class="keyword">var</span> i8 <span class="type">int8</span>   <span class="comment">// -128 to 127</span><br>
+                    <span class="keyword">var</span> i16 <span class="type">int16</span> <span class="comment">// -32768 to 32767</span><br>
+                    <span class="keyword">var</span> i32 <span class="type">int32</span> <span class="comment">// -2147483648 to 2147483647</span><br>
+                    <span class="keyword">var</span> i64 <span class="type">int64</span> <span class="comment">// Large range</span><br>
+                    <br>
+                    <span class="comment">// Unsigned integers</span><br>
+                    <span class="keyword">var</span> u <span class="type">uint</span>    <span class="comment">// Platform-dependent</span><br>
+                    <span class="keyword">var</span> u8 <span class="type">uint8</span>  <span class="comment">// 0 to 255 (byte alias)</span><br>
+                    <span class="keyword">var</span> u16 <span class="type">uint16</span><br>
+                    <span class="keyword">var</span> u32 <span class="type">uint32</span><br>
+                    <span class="keyword">var</span> u64 <span class="type">uint64</span><br>
+                    <br>
+                    <span class="comment">// Floating point</span><br>
+                    <span class="keyword">var</span> f32 <span class="type">float32</span><br>
+                    <span class="keyword">var</span> f64 <span class="type">float64</span><br>
+                    <br>
+                    <span class="comment">// Complex numbers</span><br>
+                    <span class="keyword">var</span> c64 <span class="type">complex64</span><br>
+                    <span class="keyword">var</span> c128 <span class="type">complex128</span>
+                </div>
+                <p class="command-desc">Go has a rich set of numeric types with specific sizes for precise memory usage.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-font"></i> Strings & Runes</h3>
+                <div class="command-code">
+                    <span class="comment">// String type (immutable)</span><br>
+                    <span class="keyword">var</span> s <span class="type">string</span> = <span class="string">"Hello, 世界"</span><br>
+                    <br>
+                    <span class="comment">// Rune (int32 alias for Unicode code points)</span><br>
+                    <span class="keyword">var</span> r <span class="type">rune</span> = 'A'<br>
+                    <span class="keyword">var</span> r2 <span class="type">rune</span> = '世'<br>
+                    <br>
+                    <span class="comment">// String operations</span><br>
+                    len := <span class="function">len</span>(s)              <span class="comment">// Length in bytes</span><br>
+                    chars := []<span class="type">rune</span>(s)        <span class="comment">// Convert to rune slice</span><br>
+                    sub := s[0:5]            <span class="comment">// Slicing</span><br>
+                    concat := s + <span class="string">"!"</span>        <span class="comment">// Concatenation</span><br>
+                    contains := strings.<span class="function">Contains</span>(s, <span class="string">"世界"</span>)<br>
+                </div>
+                <p class="command-desc">Strings are immutable byte slices. Runes represent Unicode code points. Use string package for manipulation.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-check-circle"></i> Booleans</h3>
+                <div class="command-code">
+                    <span class="keyword">var</span> isTrue <span class="type">bool</span> = <span class="keyword">true</span><br>
+                    <span class="keyword">var</span> isFalse <span class="type">bool</span> = <span class="keyword">false</span><br>
+                    <br>
+                    <span class="comment">// Logical operations</span><br>
+                    result1 := <span class="keyword">true</span> && <span class="keyword">false</span>  <span class="comment">// AND: false</span><br>
+                    result2 := <span class="keyword">true</span> || <span class="keyword">false</span>  <span class="comment">// OR: true</span><br>
+                    result3 := !<span class="keyword">true</span>        <span class="comment">// NOT: false</span><br>
+                    <br>
+                    <span class="comment">// Comparison operators</span><br>
+                    equal := (5 == 5)        <span class="comment">// true</span><br>
+                    notEqual := (5 != 3)     <span class="comment">// true</span><br>
+                    greater := (10 > 5)      <span class="comment">// true</span><br>
+                    less := (3 < 2)          <span class="comment">// false</span>
+                </div>
+                <p class="command-desc">Boolean type with logical operators (&&, ||, !) and comparison operators (==, !=, <, >, <=, >=).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-memory"></i> Pointers</h3>
+                <div class="command-code">
+                    <span class="keyword">var</span> x <span class="type">int</span> = 42<br>
+                    <span class="keyword">var</span> p *<span class="type">int</span> = &x  <span class="comment">// Address of x</span><br>
+                    <br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(*p)   <span class="comment">// Dereference: 42</span><br>
+                    <br>
+                    *p = 100           <span class="comment">// Modify through pointer</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(x)    <span class="comment">// 100</span><br>
+                    <br>
+                    <span class="comment">// new() allocates zeroed memory</span><br>
+                    ptr := <span class="keyword">new</span>(<span class="type">int</span>)<br>
+                    *ptr = 10
+                </div>
+                <p class="command-desc">Pointers hold memory addresses. Use & to get address, * to dereference. Go has no pointer arithmetic.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-random"></i> Type Conversions</h3>
+                <div class="command-code">
+                    <span class="keyword">var</span> i <span class="type">int</span> = 42<br>
+                    <span class="keyword">var</span> f <span class="type">float64</span> = <span class="type">float64</span>(i)<br>
+                    <span class="keyword">var</span> u <span class="type">uint</span> = <span class="type">uint</span>(f)<br>
+                    <br>
+                    <span class="comment">// String conversions</span><br>
+                    s := <span class="type">string</span>(65)        <span class="comment">// "A" (rune to string)</span><br>
+                    str := <span class="function">fmt</span>.<span class="function">Sprintf</span>(<span class="string">"%d"</span>, i)  <span class="comment">// Int to string</span><br>
+                    <br>
+                    <span class="comment">// strconv package for parsing</span><br>
+                    num, err := strconv.<span class="function">Atoi</span>(<span class="string">"123"</span>)<br>
+                    str2 := strconv.<span class="function">Itoa</span>(456)
+                </div>
+                <p class="command-desc">Go requires explicit type conversions. Use T(v) syntax. strconv package handles string conversions.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-user-secret"></i> Type Aliases & Definitions</h3>
+                <div class="command-code">
+                    <span class="comment">// Type alias (same type)</span><br>
+                    <span class="keyword">type</span> MyInt = <span class="type">int</span><br>
+                    <span class="keyword">var</span> a <span class="type">int</span> = 5<br>
+                    <span class="keyword">var</span> b MyInt = a  <span class="comment">// OK, same type</span><br>
+                    <br>
+                    <span class="comment">// Type definition (new type)</span><br>
+                    <span class="keyword">type</span> MyNewInt <span class="type">int</span><br>
+                    <span class="keyword">var</span> c <span class="type">int</span> = 5<br>
+                    <span class="comment">// var d MyNewInt = c  // Error: type mismatch</span><br>
+                    <span class="keyword">var</span> d MyNewInt = <span class="type">MyNewInt</span>(c)  <span class="comment">// OK with conversion</span><br>
+                    <br>
+                    <span class="comment">// Commonly used for readability</span><br>
+                    <span class="keyword">type</span> ID <span class="type">int64</span><br>
+                    <span class="keyword">type</span> Currency <span class="type">float64</span>
+                </div>
+                <p class="command-desc">Type aliases create alternative names for existing types. Type definitions create distinct new types.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Control Flow Section -->
+    <section id="control" class="content-section">
+        <h2 class="section-title"><i class="fas fa-project-diagram"></i> Control Flow</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code-branch"></i> If Statements</h3>
+                <div class="command-code">
+                    <span class="comment">// Basic if</span><br>
+                    <span class="keyword">if</span> x > 10 {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"x is greater than 10"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// If with initialization</span><br>
+                    <span class="keyword">if</span> val := <span class="function">computeValue</span>(); val > 100 {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Large value:"</span>, val)<br>
+                    } <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Small value:"</span>, val)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// If-else chain</span><br>
+                    <span class="keyword">if</span> score >= 90 {<br>
+                    &nbsp;&nbsp;grade = <span class="string">"A"</span><br>
+                    } <span class="keyword">else</span> <span class="keyword">if</span> score >= 80 {<br>
+                    &nbsp;&nbsp;grade = <span class="string">"B"</span><br>
+                    } <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;grade = <span class="string">"C"</span><br>
+                    }
+                </div>
+                <p class="command-desc">If statements can include initialization. Variables declared in if are scoped to the if block.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-sync-alt"></i> For Loops</h3>
+                <div class="command-code">
+                    <span class="comment">// Traditional for loop</span><br>
+                    <span class="keyword">for</span> i := 0; i < 10; i++ {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(i)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// While-like loop</span><br>
+                    count := 0<br>
+                    <span class="keyword">for</span> count < 5 {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(count)<br>
+                    &nbsp;&nbsp;count++<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Infinite loop</span><br>
+                    <span class="keyword">for</span> {<br>
+                    &nbsp;&nbsp;<span class="comment">// Break with condition</span><br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> condition {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span><br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Continue statement</span><br>
+                    <span class="keyword">for</span> i := 0; i < 10; i++ {<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> i%2 == 0 {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">continue</span>  <span class="comment">// Skip even numbers</span><br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(i)<br>
+                    }
+                </div>
+                <p class="command-desc">Go has only one loop construct: for. It can be used as traditional for, while, or infinite loop.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-retweet"></i> Range Loops</h3>
+                <div class="command-code">
+                    <span class="comment">// Range over slice/array</span><br>
+                    nums := []<span class="type">int</span>{2, 3, 4}<br>
+                    <span class="keyword">for</span> i, num := <span class="keyword">range</span> nums {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"index %d: value %d\n"</span>, i, num)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Range over map</span><br>
+                    m := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>{<span class="string">"a"</span>: 1, <span class="string">"b"</span>: 2}<br>
+                    <span class="keyword">for</span> k, v := <span class="keyword">range</span> m {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(k, v)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Range over string (runes)</span><br>
+                    <span class="keyword">for</span> i, r := <span class="keyword">range</span> <span class="string">"Hello"</span> {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%d: %c\n"</span>, i, r)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Ignore index/value</span><br>
+                    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums {<br>
+                    &nbsp;&nbsp;<span class="comment">// Only use value</span><br>
+                    }<br>
+                    <span class="keyword">for</span> i := <span class="keyword">range</span> nums {<br>
+                    &nbsp;&nbsp;<span class="comment">// Only use index</span><br>
+                    }
+                </div>
+                <p class="command-desc">Range iterates over elements in slices, arrays, maps, strings, and channels. Returns index/key and value.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-random"></i> Switch Statements</h3>
+                <div class="command-code">
+                    <span class="comment">// Basic switch</span><br>
+                    <span class="keyword">switch</span> os := runtime.<span class="function">GOOS</span>; os {<br>
+                    <span class="keyword">case</span> <span class="string">"darwin"</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"macOS"</span>)<br>
+                    <span class="keyword">case</span> <span class="string">"linux"</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Linux"</span>)<br>
+                    <span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(os)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Switch without expression (if-else alternative)</span><br>
+                    <span class="keyword">switch</span> {<br>
+                    <span class="keyword">case</span> hour < 12:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Good morning!"</span>)<br>
+                    <span class="keyword">case</span> hour < 17:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Good afternoon!"</span>)<br>
+                    <span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Good evening!"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Type switch</span><br>
+                    <span class="keyword">var</span> i <span class="keyword">interface</span>{} = <span class="string">"hello"</span><br>
+                    <span class="keyword">switch</span> v := i.(<span class="keyword">type</span>) {<br>
+                    <span class="keyword">case</span> <span class="type">int</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Integer:"</span>, v)<br>
+                    <span class="keyword">case</span> <span class="type">string</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"String:"</span>, v)<br>
+                    <span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Unknown type"</span>)<br>
+                    }
+                </div>
+                <p class="command-desc">Switch in Go is more flexible than in other languages. Cases don't fall through by default (use fallthrough keyword).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-hand-paper"></i> Defer Statement</h3>
+                <div class="command-code">
+                    <span class="comment">// Basic defer</span><br>
+                    <span class="keyword">func</span> <span class="function">readFile</span>() {<br>
+                    &nbsp;&nbsp;f, err := os.<span class="function">Open</span>(<span class="string">"file.txt"</span>)<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> err != <span class="keyword">nil</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> f.<span class="function">Close</span>()  <span class="comment">// Executes when function returns</span><br>
+                    &nbsp;&nbsp;<span class="comment">// Read file contents...</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Multiple defers (LIFO order)</span><br>
+                    <span class="keyword">func</span> <span class="function">example</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> <span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"First defer"</span>)<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> <span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Second defer"</span>)<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Function body"</span>)<br>
+                    } <span class="comment">// Prints: Function body, Second defer, First defer</span><br>
+                    <br>
+                    <span class="comment">// Defer with arguments evaluation</span><br>
+                    <span class="keyword">func</span> <span class="function">deferExample</span>() {<br>
+                    &nbsp;&nbsp;i := 1<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> <span class="function">fmt</span>.<span class="function">Println</span>(i)  <span class="comment">// Prints 1, not 2</span><br>
+                    &nbsp;&nbsp;i = 2<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span><br>
+                    }
+                </div>
+                <p class="command-desc">Defer schedules a function call to run when the surrounding function returns. Useful for cleanup tasks.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-exclamation-triangle"></i> Panic & Recover</h3>
+                <div class="command-code">
+                    <span class="comment">// Panic stops normal execution</span><br>
+                    <span class="keyword">func</span> <span class="function">mayPanic</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">panic</span>(<span class="string">"something went wrong"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Recover captures panic</span><br>
+                    <span class="keyword">func</span> <span class="function">safeCall</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> <span class="keyword">func</span>() {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> r := <span class="function">recover</span>(); r != <span class="keyword">nil</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Recovered from panic:"</span>, r)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;}()<br>
+                    &nbsp;&nbsp;<span class="function">mayPanic</span>()<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"This won't be printed"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Built-in panics</span><br>
+                    <span class="keyword">var</span> s []<span class="type">int</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(s[0])  <span class="comment">// Panic: runtime error: index out of range</span><br>
+                    <br>
+                    <span class="keyword">var</span> m <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span><br>
+                    m[<span class="string">"key"</span>] = 1  <span class="comment">// Panic: assignment to entry in nil map</span>
+                </div>
+                <p class="command-desc">Panic stops execution and unwinds the stack. Recover can capture panics in deferred functions. Use sparingly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Functions Section -->
+    <section id="functions" class="content-section">
+        <h2 class="section-title"><i class="fas fa-cogs"></i> Functions</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-function"></i> Basic Functions</h3>
+                <div class="command-code">
+                    <span class="comment">// Function with parameters and return value</span><br>
+                    <span class="keyword">func</span> <span class="function">add</span>(x <span class="type">int</span>, y <span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> x + y<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Same type parameters can be grouped</span><br>
+                    <span class="keyword">func</span> <span class="function">multiply</span>(x, y <span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> x * y<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Multiple return values</span><br>
+                    <span class="keyword">func</span> <span class="function">swap</span>(x, y <span class="type">string</span>) (<span class="type">string</span>, <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> y, x<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Named return values</span><br>
+                    <span class="keyword">func</span> <span class="function">split</span>(sum <span class="type">int</span>) (x, y <span class="type">int</span>) {<br>
+                    &nbsp;&nbsp;x = sum * 4 / 9<br>
+                    &nbsp;&nbsp;y = sum - x<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span>  <span class="comment">// "naked" return</span><br>
+                    }
+                </div>
+                <p class="command-desc">Functions can have multiple parameters and return values. Named returns act as variables defined at top of function.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-vial"></i> Variadic Functions</h3>
+                <div class="command-code">
+                    <span class="comment">// Variadic function (variable number of args)</span><br>
+                    <span class="keyword">func</span> <span class="function">sum</span>(nums ...<span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;total := 0<br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> _, num := <span class="keyword">range</span> nums {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;total += num<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> total<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Calling variadic functions</span><br>
+                    result1 := <span class="function">sum</span>(1, 2, 3)     <span class="comment">// 6</span><br>
+                    result2 := <span class="function">sum</span>(1, 2, 3, 4, 5) <span class="comment">// 15</span><br>
+                    <br>
+                    <span class="comment">// Pass slice to variadic function</span><br>
+                    nums := []<span class="type">int</span>{1, 2, 3, 4}<br>
+                    result3 := <span class="function">sum</span>(nums...)<br>
+                    <br>
+                    <span class="comment">// Variadic with other parameters</span><br>
+                    <span class="keyword">func</span> <span class="function">join</span>(sep <span class="type">string</span>, strs ...<span class="type">string</span>) <span class="type">string</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> strings.<span class="function">Join</span>(strs, sep)<br>
+                    }
+                </div>
+                <p class="command-desc">Variadic functions accept zero or more arguments of a specified type. Use ... before type in parameter list.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-arrow-right"></i> Function Values</h3>
+                <div class="command-code">
+                    <span class="comment">// Functions as values</span><br>
+                    <span class="keyword">func</span> <span class="function">add</span>(a, b <span class="type">int</span>) <span class="type">int</span> { <span class="keyword">return</span> a + b }<br>
+                    <span class="keyword">func</span> <span class="function">multiply</span>(a, b <span class="type">int</span>) <span class="type">int</span> { <span class="keyword">return</span> a * b }<br>
+                    <br>
+                    <span class="comment">// Assign function to variable</span><br>
+                    <span class="keyword">var</span> operation <span class="keyword">func</span>(<span class="type">int</span>, <span class="type">int</span>) <span class="type">int</span><br>
+                    operation = add<br>
+                    result := <span class="function">operation</span>(3, 4)  <span class="comment">// 7</span><br>
+                    <br>
+                    operation = multiply<br>
+                    result = <span class="function">operation</span>(3, 4)   <span class="comment">// 12</span><br>
+                    <br>
+                    <span class="comment">// Function as parameter</span><br>
+                    <span class="keyword">func</span> <span class="function">compute</span>(x, y <span class="type">int</span>, op <span class="keyword">func</span>(<span class="type">int</span>, <span class="type">int</span>) <span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="function">op</span>(x, y)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Anonymous function</span><br>
+                    <span class="keyword">func</span>() {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Immediately invoked"</span>)<br>
+                    }()
+                </div>
+                <p class="command-desc">Functions are first-class values in Go. They can be assigned to variables, passed as arguments, and returned from functions.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-project-diagram"></i> Closures</h3>
+                <div class="command-code">
+                    <span class="comment">// Closure example</span><br>
+                    <span class="keyword">func</span> <span class="function">counter</span>() <span class="keyword">func</span>() <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;i := 0<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="keyword">func</span>() <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;i++<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> i<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using the closure</span><br>
+                    next := <span class="function">counter</span>()<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<span class="function">next</span>())  <span class="comment">// 1</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<span class="function">next</span>())  <span class="comment">// 2</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<span class="function">next</span>())  <span class="comment">// 3</span><br>
+                    <br>
+                    <span class="comment">// Each closure has its own state</span><br>
+                    anotherCounter := <span class="function">counter</span>()<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<span class="function">anotherCounter</span>())  <span class="comment">// 1</span><br>
+                    <br>
+                    <span class="comment">// Practical closure: Adder</span><br>
+                    <span class="keyword">func</span> <span class="function">adder</span>(start <span class="type">int</span>) <span class="keyword">func</span>(<span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="keyword">func</span>(x <span class="type">int</span>) <span class="type">int</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;start += x<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> start<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                <p class="command-desc">Closures are functions that reference variables from outside their body. They encapsulate state.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-edit"></i> Methods</h3>
+                <div class="command-code">
+                    <span class="comment">// Define a type</span><br>
+                    <span class="keyword">type</span> Rectangle <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Width, Height <span class="type">float64</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Method with value receiver</span><br>
+                    <span class="keyword">func</span> (r Rectangle) <span class="function">Area</span>() <span class="type">float64</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> r.Width * r.Height<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Method with pointer receiver</span><br>
+                    <span class="keyword">func</span> (r *Rectangle) <span class="function">Scale</span>(factor <span class="type">float64</span>) {<br>
+                    &nbsp;&nbsp;r.Width *= factor<br>
+                    &nbsp;&nbsp;r.Height *= factor<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using methods</span><br>
+                    rect := Rectangle{Width: 10, Height: 5}<br>
+                    area := rect.<span class="function">Area</span>()     <span class="comment">// 50</span><br>
+                    rect.<span class="function">Scale</span>(2)          <span class="comment">// Width=20, Height=10</span><br>
+                    <br>
+                    <span class="comment">// Method on non-struct type</span><br>
+                    <span class="keyword">type</span> MyInt <span class="type">int</span><br>
+                    <br>
+                    <span class="keyword">func</span> (m MyInt) <span class="function">Double</span>() MyInt {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> m * 2<br>
+                    }
+                </div>
+                <p class="command-desc">Methods are functions with a receiver argument. Pointer receivers can modify the value, value receivers cannot.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-broadcast-tower"></i> init() Function</h3>
+                <div class="command-code">
+                    <span class="comment">// Each file can have init() functions</span><br>
+                    <span class="keyword">func</span> <span class="function">init</span>() {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Package initialization"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Multiple init() functions execute in order</span><br>
+                    <span class="keyword">func</span> <span class="function">init</span>() {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Second initialization"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Main function"</span>)<br>
+                    }<br>
+                    <span class="comment">// Output:<br>
+// Package initialization<br>
+// Second initialization<br>
+// Main function</span><br>
+                    <br>
+                    <span class="comment">// Common use cases:</span><br>
+                    <span class="keyword">var</span> config <span class="type">string</span><br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">init</span>() {<br>
+                    &nbsp;&nbsp;<span class="comment">// Initialize package variables</span><br>
+                    &nbsp;&nbsp;config = os.<span class="function">Getenv</span>(<span class="string">"APP_CONFIG"</span>)<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> config == <span class="string">""</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;config = <span class="string">"default"</span><br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                <p class="command-desc">init() functions are automatically executed before main(). Each package can have multiple init() functions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Structs & Interfaces Section -->
+    <section id="structs" class="content-section">
+        <h2 class="section-title"><i class="fas fa-cube"></i> Structs & Interfaces</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-cube"></i> Structs</h3>
+                <div class="command-code">
+                    <span class="comment">// Define a struct</span><br>
+                    <span class="keyword">type</span> Person <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Name <span class="type">string</span><br>
+                    &nbsp;&nbsp;Age  <span class="type">int</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Create struct instances</span><br>
+                    <span class="keyword">var</span> p1 Person                    <span class="comment">// Zero value</span><br>
+                    p2 := Person{<span class="string">"Alice"</span>, 30}         <span class="comment">// Literal</span><br>
+                    p3 := Person{Name: <span class="string">"Bob"</span>, Age: 25} <span class="comment">// Field names</span><br>
+                    p4 := &Person{<span class="string">"Charlie"</span>, 35}       <span class="comment">// Pointer</span><br>
+                    <br>
+                    <span class="comment">// Access fields</span><br>
+                    p1.Name = <span class="string">"David"</span><br>
+                    age := p2.Age<br>
+                    <br>
+                    <span class="comment">// Anonymous structs</span><br>
+                    point := <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;X, Y <span class="type">int</span><br>
+                    }{10, 20}<br>
+                    <br>
+                    <span class="comment">// Nested structs</span><br>
+                    <span class="keyword">type</span> Address <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;City, Country <span class="type">string</span><br>
+                    }<br>
+                    <span class="keyword">type</span> Employee <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Person<br>
+                    &nbsp;&nbsp;Address Address<br>
+                    &nbsp;&nbsp;Salary  <span class="type">float64</span><br>
+                    }
+                </div>
+                <p class="command-desc">Structs are collections of fields. They can be nested and support anonymous structs for one-time use.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-tag"></i> Struct Tags</h3>
+                <div class="command-code">
+                    <span class="comment">// Struct with tags</span><br>
+                    <span class="keyword">type</span> User <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;ID        <span class="type">int</span>     <span class="string">`json:"id" db:"user_id"`</span><br>
+                    &nbsp;&nbsp;Username  <span class="type">string</span>  <span class="string">`json:"username" validate:"required"`</span><br>
+                    &nbsp;&nbsp;Email     <span class="type">string</span>  <span class="string">`json:"email,omitempty"`</span><br>
+                    &nbsp;&nbsp;Password  <span class="type">string</span>  <span class="string">`json:"-"`</span>  <span class="comment">// Never marshal</span><br>
+                    &nbsp;&nbsp;CreatedAt time.Time <span class="string">`json:"created_at"`</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using tags with encoding/json</span><br>
+                    <span class="keyword">func</span> <span class="function">example</span>() {<br>
+                    &nbsp;&nbsp;user := User{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;ID: 1,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Username: <span class="string">"johndoe"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Email: <span class="string">""</span>,<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;jsonData, err := json.<span class="function">Marshal</span>(user)<br>
+                    &nbsp;&nbsp;<span class="comment">// {"id":1,"username":"johndoe"}</span><br>
+                    &nbsp;&nbsp;<span class="comment">// Email omitted due to omitempty</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Reading tags with reflection</span><br>
+                    <span class="keyword">func</span> <span class="function">printTags</span>() {<br>
+                    &nbsp;&nbsp;t := reflect.<span class="function">TypeOf</span>(User{})<br>
+                    &nbsp;&nbsp;field := t.<span class="function">Field</span>(0)<br>
+                    &nbsp;&nbsp;tag := field.Tag.<span class="function">Get</span>(<span class="string">"json"</span>)<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(tag)  <span class="comment">// "id"</span><br>
+                    }
+                </div>
+                <p class="command-desc">Struct tags are metadata strings attached to struct fields, commonly used by encoding packages and validators.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-puzzle-piece"></i> Interfaces</h3>
+                <div class="command-code">
+                    <span class="comment">// Define interface</span><br>
+                    <span class="keyword">type</span> Shape <span class="keyword">interface</span> {<br>
+                    &nbsp;&nbsp;<span class="function">Area</span>() <span class="type">float64</span><br>
+                    &nbsp;&nbsp;<span class="function">Perimeter</span>() <span class="type">float64</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Implement interface implicitly</span><br>
+                    <span class="keyword">type</span> Rectangle <span class="keyword">struct</span> { Width, Height <span class="type">float64</span> }<br>
+                    <span class="keyword">func</span> (r Rectangle) <span class="function">Area</span>() <span class="type">float64</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> r.Width * r.Height<br>
+                    }<br>
+                    <span class="keyword">func</span> (r Rectangle) <span class="function">Perimeter</span>() <span class="type">float64</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> 2 * (r.Width + r.Height)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using interface</span><br>
+                    <span class="keyword">func</span> <span class="function">printArea</span>(s Shape) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Area:"</span>, s.<span class="function">Area</span>())<br>
+                    }<br>
+                    <br>
+                    rect := Rectangle{Width: 10, Height: 5}<br>
+                    <span class="function">printArea</span>(rect)  <span class="comment">// Area: 50</span><br>
+                    <br>
+                    <span class="comment">// Empty interface (any type)</span><br>
+                    <span class="keyword">func</span> <span class="function">describe</span>(i <span class="keyword">interface</span>{}) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Type: %T, Value: %v\n"</span>, i, i)<br>
+                    }
+                </div>
+                <p class="command-desc">Interfaces define method sets. Types implement interfaces implicitly by implementing all methods. Empty interface (interface{}) accepts any value.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-check-double"></i> Type Assertions</h3>
+                <div class="command-code">
+                    <span class="comment">// Type assertion</span><br>
+                    <span class="keyword">var</span> i <span class="keyword">interface</span>{} = <span class="string">"hello"</span><br>
+                    <br>
+                    s := i.(<span class="type">string</span>)<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(s)  <span class="comment">// hello</span><br>
+                    <br>
+                    <span class="comment">// Type assertion with ok check</span><br>
+                    s, ok := i.(<span class="type">string</span>)<br>
+                    <span class="keyword">if</span> ok {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"String:"</span>, s)<br>
+                    } <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Not a string"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Failed assertion causes panic</span><br>
+                    <span class="comment">// f := i.(float64) // panic!</span><br>
+                    <br>
+                    <span class="comment">// Practical example</span><br>
+                    <span class="keyword">func</span> <span class="function">processValue</span>(val <span class="keyword">interface</span>{}) {<br>
+                    &nbsp;&nbsp;<span class="keyword">switch</span> v := val.(<span class="keyword">type</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> <span class="type">int</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Integer:"</span>, v*2)<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> <span class="type">string</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"String:"</span>, strings.<span class="function">ToUpper</span>(v))<br>
+                    &nbsp;&nbsp;<span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Unknown type"</span>)<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                <p class="command-desc">Type assertions extract concrete values from interfaces. Use the "comma ok" idiom to avoid panics with failed assertions.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-wrench"></i> Embedded Types</h3>
+                <div class="command-code">
+                    <span class="comment">// Embedded struct (composition)</span><br>
+                    <span class="keyword">type</span> Person <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Name <span class="type">string</span><br>
+                    &nbsp;&nbsp;Age  <span class="type">int</span><br>
+                    }<br>
+                    <br>
+                    <span class="keyword">type</span> Employee <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Person           <span class="comment">// Embedded type</span><br>
+                    &nbsp;&nbsp;Department <span class="type">string</span><br>
+                    &nbsp;&nbsp;Salary     <span class="type">float64</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using embedded type</span><br>
+                    emp := Employee{<br>
+                    &nbsp;&nbsp;Person: Person{Name: <span class="string">"Alice"</span>, Age: 30},<br>
+                    &nbsp;&nbsp;Department: <span class="string">"Engineering"</span>,<br>
+                    &nbsp;&nbsp;Salary: 75000,<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Access embedded fields directly</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(emp.Name)        <span class="comment">// Alice (promoted field)</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(emp.Person.Age)  <span class="comment">// 30 (explicit)</span><br>
+                    <br>
+                    <span class="comment">// Embedded interfaces</span><br>
+                    <span class="keyword">type</span> Reader <span class="keyword">interface</span> {<br>
+                    &nbsp;&nbsp;<span class="function">Read</span>([]<span class="type">byte</span>) (<span class="type">int</span>, error)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">type</span> Writer <span class="keyword">interface</span> {<br>
+                    &nbsp;&nbsp;<span class="function">Write</span>([]<span class="type">byte</span>) (<span class="type">int</span>, error)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">type</span> ReadWriter <span class="keyword">interface</span> {<br>
+                    &nbsp;&nbsp;Reader<br>
+                    &nbsp;&nbsp;Writer<br>
+                    }
+                </div>
+                <p class="command-desc">Embedded types allow composition. Fields and methods of embedded types are promoted to the outer type (but can be shadowed).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-user-check"></i> Stringer Interface</h3>
+                <div class="command-code">
+                    <span class="comment">// fmt.Stringer interface</span><br>
+                    <span class="keyword">type</span> Stringer <span class="keyword">interface</span> {<br>
+                    &nbsp;&nbsp;<span class="function">String</span>() <span class="type">string</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Custom type implementing Stringer</span><br>
+                    <span class="keyword">type</span> Point <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;X, Y <span class="type">int</span><br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> (p Point) <span class="function">String</span>() <span class="type">string</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="function">fmt</span>.<span class="function">Sprintf</span>(<span class="string">"Point(%d, %d)"</span>, p.X, p.Y)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using the Stringer</span><br>
+                    p := Point{X: 10, Y: 20}<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(p)  <span class="comment">// Prints: Point(10, 20)</span><br>
+                    <br>
+                    <span class="comment">// Another example with enum-like type</span><br>
+                    <span class="keyword">type</span> Color <span class="type">int</span><br>
+                    <br>
+                    <span class="keyword">const</span> (<br>
+                    &nbsp;&nbsp;Red Color = <span class="keyword">iota</span><br>
+                    &nbsp;&nbsp;Green<br>
+                    &nbsp;&nbsp;Blue<br>
+                    )<br>
+                    <br>
+                    <span class="keyword">func</span> (c Color) <span class="function">String</span>() <span class="type">string</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">switch</span> c {<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> Red:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"Red"</span><br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> Green:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"Green"</span><br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> Blue:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"Blue"</span><br>
+                    &nbsp;&nbsp;<span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"Unknown"</span><br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                <p class="command-desc">The Stringer interface (from fmt package) allows custom string representation for types. fmt.Println uses this automatically.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Concurrency Section -->
+    <section id="concurrency" class="content-section">
+        <h2 class="section-title"><i class="fas fa-bolt"></i> Concurrency</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-play"></i> Goroutines</h3>
+                <div class="command-code">
+                    <span class="comment">// Start a goroutine</span><br>
+                    <span class="keyword">func</span> <span class="function">say</span>(s <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> i := 0; i < 5; i++ {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;time.<span class="function">Sleep</span>(100 * time.Millisecond)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(s)<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">go</span> <span class="function">say</span>(<span class="string">"world"</span>)  <span class="comment">// New goroutine</span><br>
+                    &nbsp;&nbsp;<span class="function">say</span>(<span class="string">"hello"</span>)     <span class="comment">// Current goroutine</span><br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Anonymous function goroutine</span><br>
+                    <span class="keyword">go</span> <span class="keyword">func</span>(msg <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(msg)<br>
+                    }(<span class="string">"starting"</span>)<br>
+                    <br>
+                    <span class="comment">// Goroutine with closure</span><br>
+                    <span class="keyword">for</span> i := 0; i < 5; i++ {<br>
+                    &nbsp;&nbsp;<span class="keyword">go</span> <span class="keyword">func</span>(n <span class="type">int</span>) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(n)<br>
+                    &nbsp;&nbsp;}(i)<br>
+                    &nbsp;&nbsp;<span class="comment">// Pass i as parameter to avoid closure issues</span><br>
+                    }
+                </div>
+                <p class="command-desc">Goroutines are lightweight threads managed by the Go runtime. Use 'go' keyword to start a new goroutine.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-exchange-alt"></i> Channels</h3>
+                <div class="command-code">
+                    <span class="comment">// Create a channel</span><br>
+                    ch := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">int</span>)<br>
+                    <br>
+                    <span class="comment">// Send to channel (blocks until received)</span><br>
+                    <span class="keyword">go</span> <span class="keyword">func</span>() {<br>
+                    &nbsp;&nbsp;ch <- 42<br>
+                    }()<br>
+                    <br>
+                    <span class="comment">// Receive from channel (blocks until sent)</span><br>
+                    value := <-ch<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(value)  <span class="comment">// 42</span><br>
+                    <br>
+                    <span class="comment">// Buffered channel</span><br>
+                    buffered := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">string</span>, 2)<br>
+                    buffered <- <span class="string">"first"</span><br>
+                    buffered <- <span class="string">"second"</span><br>
+                    <span class="comment">// buffered <- "third"  // Would block (buffer full)</span><br>
+                    <br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<-buffered)  <span class="comment">// first</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<-buffered)  <span class="comment">// second</span><br>
+                    <br>
+                    <span class="comment">// Channel direction (in function signatures)</span><br>
+                    <span class="keyword">func</span> <span class="function">producer</span>(ch <span class="keyword">chan</span><- <span class="type">int</span>) {  <span class="comment">// Send-only</span><br>
+                    &nbsp;&nbsp;ch <- 1<br>
+                    }<br>
+                    <span class="keyword">func</span> <span class="function">consumer</span>(ch <-<span class="keyword">chan</span> <span class="type">int</span>) {  <span class="comment">// Receive-only</span><br>
+                    &nbsp;&nbsp;value := <-ch<br>
+                    }
+                </div>
+                <p class="command-desc">Channels are typed conduits for Goroutine communication. Can be unbuffered (synchronous) or buffered (asynchronous).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-tasks"></i> Select Statement</h3>
+                <div class="command-code">
+                    <span class="comment">// Select with multiple channels</span><br>
+                    <span class="keyword">func</span> <span class="function">worker</span>(ch1, ch2 <span class="keyword">chan</span> <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">select</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">case</span> msg1 := <-ch1:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"From ch1:"</span>, msg1)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">case</span> msg2 := <-ch2:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"From ch2:"</span>, msg2)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">case</span> <-time.<span class="function">After</span>(1 * time.Second):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"timeout"</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Default case (non-blocking)</span><br>
+                    <span class="keyword">select</span> {<br>
+                    <span class="keyword">case</span> msg := <-ch:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Received:"</span>, msg)<br>
+                    <span class="keyword">default</span>:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"No message received"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Select for sending</span><br>
+                    <span class="keyword">select</span> {<br>
+                    <span class="keyword">case</span> ch <- value:<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Sent value"</span>)<br>
+                    <span class="keyword">case</span> <-time.<span class="function">After</span>(100 * time.Millisecond):<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Send timeout"</span>)<br>
+                    }
+                </div>
+                <p class="command-desc">Select waits on multiple channel operations. It blocks until one of its cases can run, then executes that case.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-lock"></i> Sync Package</h3>
+                <div class="command-code">
+                    <span class="comment">// WaitGroup for goroutine synchronization</span><br>
+                    <span class="keyword">func</span> <span class="function">worker</span>(id <span class="type">int</span>, wg *sync.WaitGroup) {<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> wg.<span class="function">Done</span>()<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Worker %d starting\n"</span>, id)<br>
+                    &nbsp;&nbsp;time.<span class="function">Sleep</span>(time.Second)<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Worker %d done\n"</span>, id)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">var</span> wg sync.WaitGroup<br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> i := 1; i <= 5; i++ {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;wg.<span class="function">Add</span>(1)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">go</span> <span class="function">worker</span>(i, &wg)<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;wg.<span class="function">Wait</span>()<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Mutex for shared data</span><br>
+                    <span class="keyword">type</span> SafeCounter <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;mu    sync.Mutex<br>
+                    &nbsp;&nbsp;value <span class="type">int</span><br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> (c *SafeCounter) <span class="function">Increment</span>() {<br>
+                    &nbsp;&nbsp;c.mu.<span class="function">Lock</span>()<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> c.mu.<span class="function">Unlock</span>()<br>
+                    &nbsp;&nbsp;c.value++<br>
+                    }
+                </div>
+                <p class="command-desc">Sync package provides synchronization primitives: WaitGroup for waiting on goroutines, Mutex for mutual exclusion, and more.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-stream"></i> Context Package</h3>
+                <div class="command-code">
+                    <span class="comment">// Context with timeout</span><br>
+                    <span class="keyword">func</span> <span class="function">worker</span>(ctx context.Context) {<br>
+                    &nbsp;&nbsp;<span class="keyword">select</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> <-time.<span class="function">After</span>(2 * time.Second):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Work done"</span>)<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> <-ctx.<span class="function">Done</span>():<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Cancelled:"</span>, ctx.<span class="function">Err</span>())<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;ctx, cancel := context.<span class="function">WithTimeout</span>(context.<span class="function">Background</span>(), 1*time.Second)<br>
+                    &nbsp;&nbsp;<span class="keyword">defer</span> <span class="function">cancel</span>()<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="keyword">go</span> <span class="function">worker</span>(ctx)<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="keyword">select</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">case</span> <-ctx.<span class="function">Done</span>():<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Main: timeout reached"</span>)<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Context with value</span><br>
+                    ctx := context.<span class="function">WithValue</span>(context.<span class="function">Background</span>(), <span class="string">"key"</span>, <span class="string">"value"</span>)<br>
+                    <span class="keyword">if</span> v := ctx.<span class="function">Value</span>(<span class="string">"key"</span>); v != <span class="keyword">nil</span> {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Value:"</span>, v)<br>
+                    }
+                </div>
+                <p class="command-desc">Context carries deadlines, cancellation signals, and request-scoped values across API boundaries and between goroutines.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-random"></i> Patterns: Worker Pools</h3>
+                <div class="command-code">
+                    <span class="comment">// Worker pool pattern</span><br>
+                    <span class="keyword">func</span> <span class="function">worker</span>(id <span class="type">int</span>, jobs <-<span class="keyword">chan</span> <span class="type">int</span>, results <span class="keyword">chan</span><- <span class="type">int</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> j := <span class="keyword">range</span> jobs {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Worker %d processing job %d\n"</span>, id, j)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;time.<span class="function">Sleep</span>(time.Second)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;results <- j * 2<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">main</span>() {<br>
+                    &nbsp;&nbsp;jobs := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">int</span>, 100)<br>
+                    &nbsp;&nbsp;results := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">int</span>, 100)<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="comment">// Start 3 workers</span><br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> w := 1; w <= 3; w++ {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">go</span> <span class="function">worker</span>(w, jobs, results)<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="comment">// Send 9 jobs</span><br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> j := 1; j <= 9; j++ {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;jobs <- j<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;<span class="function">close</span>(jobs)<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="comment">// Collect results</span><br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> a := 1; a <= 9; a++ {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<-results<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                <p class="command-desc">Worker pools use multiple goroutines to process work from a queue. Useful for controlling concurrency and resource usage.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections Section -->
+    <section id="collections" class="content-section">
+        <h2 class="section-title"><i class="fas fa-layer-group"></i> Collections</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-list"></i> Arrays</h3>
+                <div class="command-code">
+                    <span class="comment">// Array declaration</span><br>
+                    <span class="keyword">var</span> a [3]<span class="type">int</span>               <span class="comment">// Zero-valued array</span><br>
+                    b := [3]<span class="type">int</span>{1, 2, 3}        <span class="comment">// Literal</span><br>
+                    c := [...]<span class="type">int</span>{1, 2, 3, 4}   <span class="comment">// Compiler counts size</span><br>
+                    d := [2][3]<span class="type">int</span>{{"{{"}}1, 2, 3{{"}"}}, {{"{{"}}4, 5, 6{{"}"}} <span class="comment">// 2D array</span><br>
+                    <br>
+                    <span class="comment">// Access and modify</span><br>
+                    a[0] = 10<br>
+                    value := b[1]  <span class="comment">// 2</span><br>
+                    <br>
+                    <span class="comment">// Length</span><br>
+                    length := <span class="function">len</span>(c)  <span class="comment">// 4</span><br>
+                    <br>
+                    <span class="comment">// Iteration</span><br>
+                    <span class="keyword">for</span> i := 0; i < <span class="function">len</span>(a); i++ {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(a[i])<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">for</span> i, v := <span class="keyword">range</span> b {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Index %d: Value %d\n"</span>, i, v)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Arrays are values (copied when assigned)</span><br>
+                    arr1 := [2]<span class="type">int</span>{1, 2}<br>
+                    arr2 := arr1    <span class="comment">// Copy</span><br>
+                    arr2[0] = 10    <span class="comment">// Doesn't affect arr1</span>
+                </div>
+                <p class="command-desc">Arrays are fixed-size sequences. Size is part of the type. Arrays are values, not references.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-layer-group"></i> Slices</h3>
+                <div class="command-code">
+                    <span class="comment">// Slice creation</span><br>
+                    <span class="keyword">var</span> s1 []<span class="type">int</span>                <span class="comment">// nil slice</span><br>
+                    s2 := []<span class="type">int</span>{1, 2, 3}         <span class="comment">// Literal</span><br>
+                    s3 := <span class="keyword">make</span>([]<span class="type">string</span>, 3)     <span class="comment">// Length 3, capacity 3</span><br>
+                    s4 := <span class="keyword">make</span>([]<span class="type">int</span>, 2, 5)     <span class="comment">// Length 2, capacity 5</span><br>
+                    <br>
+                    <span class="comment">// From array</span><br>
+                    arr := [5]<span class="type">int</span>{1, 2, 3, 4, 5}<br>
+                    s5 := arr[1:4]             <span class="comment">// [2, 3, 4]</span><br>
+                    <br>
+                    <span class="comment">// Slice operations</span><br>
+                    s2 = <span class="function">append</span>(s2, 4)          <span class="comment">// [1, 2, 3, 4]</span><br>
+                    s2 = <span class="function">append</span>(s2, 5, 6)       <span class="comment">// [1, 2, 3, 4, 5, 6]</span><br>
+                    s2 = <span class="function">append</span>(s2, s3...)      <span class="comment">// Append another slice</span><br>
+                    <br>
+                    <span class="comment">// Copy slices</span><br>
+                    src := []<span class="type">int</span>{1, 2, 3}<br>
+                    dst := <span class="keyword">make</span>([]<span class="type">int</span>, 2)<br>
+                    n := <span class="function">copy</span>(dst, src)         <span class="comment">// n = 2, dst = [1, 2]</span><br>
+                    <br>
+                    <span class="comment">// Slice tricks</span><br>
+                    s2 = s2[1:]                <span class="comment">// Remove first element</span><br>
+                    s2 = s2[:<span class="function">len</span>(s2)-1]         <span class="comment">// Remove last element</span><br>
+                    s2 = <span class="function">append</span>(s2[:2], s2[3:]...)  <span class="comment">// Remove element at index 2</span>
+                </div>
+                <p class="command-desc">Slices are dynamic arrays with length and capacity. They reference underlying arrays. Use make() to create with specific capacity.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-map"></i> Maps</h3>
+                <div class="command-code">
+                    <span class="comment">// Map creation</span><br>
+                    <span class="keyword">var</span> m1 <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>         <span class="comment">// nil map</span><br>
+                    m2 := <span class="keyword">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>)  <span class="comment">// Empty map</span><br>
+                    m3 := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>{<br>
+                    &nbsp;&nbsp;<span class="string">"apple"</span>: 5,<br>
+                    &nbsp;&nbsp;<span class="string">"banana"</span>: 10,<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Operations</span><br>
+                    m2[<span class="string">"key"</span>] = 1           <span class="comment">// Insert or update</span><br>
+                    value := m2[<span class="string">"key"</span>]      <span class="comment">// Retrieve</span><br>
+                    delete(m2, <span class="string">"key"</span>)      <span class="comment">// Delete</span><br>
+                    <br>
+                    <span class="comment">// Check if key exists</span><br>
+                    v, ok := m2[<span class="string">"key"</span>]<br>
+                    <span class="keyword">if</span> ok {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Value:"</span>, v)<br>
+                    } <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Key not found"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Iteration</span><br>
+                    <span class="keyword">for</span> k, v := <span class="keyword">range</span> m3 {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(k, v)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Length</span><br>
+                    length := <span class="function">len</span>(m3)
+                </div>
+                <p class="command-desc">Maps are unordered key-value collections. Keys must be comparable (no slices, maps, or functions).</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-sort"></i> Sorting</h3>
+                <div class="command-code">
+                    <span class="comment">// Sorting slices</span><br>
+                    ints := []<span class="type">int</span>{4, 2, 8, 1}<br>
+                    sort.<span class="function">Ints</span>(ints)           <span class="comment">// [1, 2, 4, 8]</span><br>
+                    <br>
+                    strings := []<span class="type">string</span>{<span class="string">"banana"</span>, <span class="string">"apple"</span>, <span class="string">"cherry"</span>}<br>
+                    sort.<span class="function">Strings</span>(strings)     <span class="comment">// ["apple", "banana", "cherry"]</span><br>
+                    <br>
+                    <span class="comment">// Custom sorting with sort.Interface</span><br>
+                    <span class="keyword">type</span> Person <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Name <span class="type">string</span><br>
+                    &nbsp;&nbsp;Age  <span class="type">int</span><br>
+                    }<br>
+                    <br>
+                    <span class="keyword">type</span> ByAge []Person<br>
+                    <br>
+                    <span class="keyword">func</span> (a ByAge) <span class="function">Len</span>() <span class="type">int</span>           { <span class="keyword">return</span> <span class="function">len</span>(a) }<br>
+                    <span class="keyword">func</span> (a ByAge) <span class="function">Swap</span>(i, j <span class="type">int</span>)      { a[i], a[j] = a[j], a[i] }<br>
+                    <span class="keyword">func</span> (a ByAge) <span class="function">Less</span>(i, j <span class="type">int</span>) <span class="type">bool</span> { <span class="keyword">return</span> a[i].Age < a[j].Age }<br>
+                    <br>
+                    people := []Person{<br>
+                    &nbsp;&nbsp;{<span class="string">"Alice"</span>, 30},<br>
+                    &nbsp;&nbsp;{<span class="string">"Bob"</span>, 25},<br>
+                    &nbsp;&nbsp;{<span class="string">"Charlie"</span>, 35},<br>
+                    }<br>
+                    sort.<span class="function">Sort</span>(<span class="function">ByAge</span>(people))<br>
+                    <br>
+                    <span class="comment">// sort.Slice (Go 1.8+)</span><br>
+                    sort.<span class="function">Slice</span>(people, <span class="keyword">func</span>(i, j <span class="type">int</span>) <span class="type">bool</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> people[i].Name < people[j].Name<br>
+                    })
+                </div>
+                <p class="command-desc">Sort package provides sorting for built-in types. Implement sort.Interface or use sort.Slice for custom sorting.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-filter"></i> Container Package</h3>
+                <div class="command-code">
+                    <span class="comment">// List (doubly linked list)</span><br>
+                    list := list.<span class="function">New</span>()<br>
+                    list.<span class="function">PushBack</span>(1)<br>
+                    list.<span class="function">PushFront</span>(2)<br>
+                    <span class="keyword">for</span> e := list.<span class="function">Front</span>(); e != <span class="keyword">nil</span>; e = e.<span class="function">Next</span>() {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(e.Value)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Ring (circular list)</span><br>
+                    r := ring.<span class="function">New</span>(3)<br>
+                    <span class="keyword">for</span> i := 0; i < 3; i++ {<br>
+                    &nbsp;&nbsp;r.Value = i<br>
+                    &nbsp;&nbsp;r = r.<span class="function">Next</span>()<br>
+                    }<br>
+                    r.<span class="function">Do</span>(<span class="keyword">func</span>(x <span class="keyword">interface</span>{}) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(x)<br>
+                    })<br>
+                    <br>
+                    <span class="comment">// Heap (priority queue)</span><br>
+                    <span class="keyword">type</span> IntHeap []<span class="type">int</span><br>
+                    <br>
+                    <span class="keyword">func</span> (h IntHeap) <span class="function">Len</span>() <span class="type">int</span>           { <span class="keyword">return</span> <span class="function">len</span>(h) }<br>
+                    <span class="keyword">func</span> (h IntHeap) <span class="function">Less</span>(i, j <span class="type">int</span>) <span class="type">bool</span> { <span class="keyword">return</span> h[i] < h[j] }<br>
+                    <span class="keyword">func</span> (h IntHeap) <span class="function">Swap</span>(i, j <span class="type">int</span>)      { h[i], h[j] = h[j], h[i] }<br>
+                    <span class="keyword">func</span> (h *IntHeap) <span class="function">Push</span>(x <span class="keyword">interface</span>{}) {<br>
+                    &nbsp;&nbsp;*h = <span class="function">append</span>(*h, x.(<span class="type">int</span>))<br>
+                    }<br>
+                    <span class="keyword">func</span> (h *IntHeap) <span class="function">Pop</span>() <span class="keyword">interface</span>{} {<br>
+                    &nbsp;&nbsp;old := *h<br>
+                    &nbsp;&nbsp;n := <span class="function">len</span>(old)<br>
+                    &nbsp;&nbsp;x := old[n-1]<br>
+                    &nbsp;&nbsp;*h = old[0 : n-1]<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> x<br>
+                    }
+                </div>
+                <p class="command-desc">Container package provides list (doubly linked list), ring (circular list), and heap (priority queue) implementations.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-compress-alt"></i> Set Implementation</h3>
+                <div class="command-code">
+                    <span class="comment">// Set using map[T]bool</span><br>
+                    <span class="keyword">type</span> Set <span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">struct</span>{}<br>
+                    <br>
+                    <span class="keyword">func</span> <span class="function">NewSet</span>() Set {<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="keyword">make</span>(Set)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> (s Set) <span class="function">Add</span>(value <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;s[value] = <span class="keyword">struct</span>{}{}<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> (s Set) <span class="function">Remove</span>(value <span class="type">string</span>) {<br>
+                    &nbsp;&nbsp;<span class="keyword">delete</span>(s, value)<br>
+                    }<br>
+                    <br>
+                    <span class="keyword">func</span> (s Set) <span class="function">Contains</span>(value <span class="type">string</span>) <span class="type">bool</span> {<br>
+                    &nbsp;&nbsp;_, exists := s[value]<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> exists<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Using the set</span><br>
+                    s := <span class="function">NewSet</span>()<br>
+                    s.<span class="function">Add</span>(<span class="string">"apple"</span>)<br>
+                    s.<span class="function">Add</span>(<span class="string">"banana"</span>)<br>
+                    <br>
+                    <span class="keyword">if</span> s.<span class="function">Contains</span>(<span class="string">"apple"</span>) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Set contains apple"</span>)<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Generic set (Go 1.18+)</span><br>
+                    <span class="keyword">type</span> Set[T comparable] <span class="keyword">map</span>[T]<span class="keyword">struct</span>{}
+                </div>
+                <p class="command-desc">Go doesn't have built-in sets. Implement using maps with empty struct values (zero memory) as the most efficient approach.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Standard Library Section -->
+    <section id="stdlib" class="content-section">
+        <h2 class="section-title"><i class="fas fa-book"></i> Standard Library</h2>
+        <div class="command-grid">
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-print"></i> fmt Package</h3>
+                <div class="command-code">
+                    <span class="comment">// Printing</span><br>
+                    <span class="function">fmt</span>.<span class="function">Print</span>(<span class="string">"Hello"</span>)        <span class="comment">// No newline</span><br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Hello"</span>)    <span class="comment">// With newline</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"Name: %s, Age: %d"</span>, name, age)<br>
+                    <br>
+                    <span class="comment">// String formatting</span><br>
+                    s := <span class="function">fmt</span>.<span class="function">Sprintf</span>(<span class="string">"Value: %v"</span>, data)<br>
+                    <span class="function">fmt</span>.<span class="function">Fprintf</span>(os.Stdout, <span class="string">"Writing: %s\n"</span>, text)<br>
+                    <br>
+                    <span class="comment">// Common format verbs</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%v"</span>, value)    <span class="comment">// Default format</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%+v"</span>, value)   <span class="comment">// Add field names (structs)</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%#v"</span>, value)   <span class="comment">// Go syntax</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%T"</span>, value)    <span class="comment">// Type</span><br>
+                    <span class="function">fmt</span>.<span class="function">Printf</span>(<span class="string">"%.2f"</span>, 3.14159) <span class="comment">// Float precision</span><br>
+                    <br>
+                    <span class="comment">// Scanning input</span><br>
+                    <span class="keyword">var</span> input <span class="type">string</span><br>
+                    <span class="function">fmt</span>.<span class="function">Scan</span>(&input)<br>
+                    <span class="function">fmt</span>.<span class="function">Scanf</span>(<span class="string">"%s %d"</span>, &name, &age)<br>
+                    <span class="function">fmt</span>.<span class="function">Scanln</span>(&input)
+                </div>
+                <p class="command-desc">fmt package provides formatted I/O. Use Print for output, Scan for input, Sprintf for string formatting.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-file"></i> os & io Packages</h3>
+                <div class="command-code">
+                    <span class="comment">// File operations</span><br>
+                    file, err := os.<span class="function">Open</span>(<span class="string">"file.txt"</span>)<br>
+                    <span class="keyword">defer</span> file.<span class="function">Close</span>()<br>
+                    <br>
+                    data := []<span class="type">byte</span>(<span class="string">"Hello"</span>)<br>
+                    err = os.<span class="function">WriteFile</span>(<span class="string">"output.txt"</span>, data, 0644)<br>
+                    <br>
+                    content, err := os.<span class="function">ReadFile</span>(<span class="string">"file.txt"</span>)<br>
+                    <br>
+                    <span class="comment">// Environment variables</span><br>
+                    path := os.<span class="function">Getenv</span>(<span class="string">"PATH"</span>)<br>
+                    os.<span class="function">Setenv</span>(<span class="string">"KEY"</span>, <span class="string">"value"</span>)<br>
+                    <br>
+                    <span class="comment">// Command-line arguments</span><br>
+                    args := os.Args<br>
+                    <span class="keyword">if</span> <span class="function">len</span>(args) > 1 {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"First arg:"</span>, args[1])<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// io utilities</span><br>
+                    n, err := io.<span class="function">Copy</span>(dst, src)<br>
+                    all, err := io.<span class="function">ReadAll</span>(reader)<br>
+                    io.<span class="function">WriteString</span>(writer, <span class="string">"text"</span>)
+                </div>
+                <p class="command-desc">os provides OS interface (files, env vars, args). io provides basic I/O interfaces and utilities.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-network-wired"></i> net/http Package</h3>
+                <div class="command-code">
+                    <span class="comment">// HTTP server</span><br>
+                    <span class="keyword">func</span> <span class="function">handler</span>(w http.ResponseWriter, r *http.Request) {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Fprintf</span>(w, <span class="string">"Hello, %s!"</span>, r.URL.Path[1:])<br>
+                    }<br>
+                    <br>
+                    http.<span class="function">HandleFunc</span>(<span class="string">"/"</span>, handler)<br>
+                    http.<span class="function">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>)<br>
+                    <br>
+                    <span class="comment">// HTTP client</span><br>
+                    resp, err := http.<span class="function">Get</span>(<span class="string">"https://api.example.com"</span>)<br>
+                    <span class="keyword">defer</span> resp.Body.<span class="function">Close</span>()<br>
+                    body, err := io.<span class="function">ReadAll</span>(resp.Body)<br>
+                    <br>
+                    <span class="comment">// POST request</span><br>
+                    jsonData := []<span class="type">byte</span>(<span class="string">`{"name":"John"}`</span>)<br>
+                    resp, err := http.<span class="function">Post</span>(<span class="string">"https://api.example.com"</span>,<br>
+                    &nbsp;&nbsp;<span class="string">"application/json"</span>, bytes.<span class="function">NewBuffer</span>(jsonData))<br>
+                    <br>
+                    <span class="comment">// Custom client with timeout</span><br>
+                    client := &http.Client{<br>
+                    &nbsp;&nbsp;Timeout: 10 * time.Second,<br>
+                    }<br>
+                    req, _ := http.<span class="function">NewRequest</span>(<span class="string">"GET"</span>, <span class="string">"https://example.com"</span>, <span class="keyword">nil</span>)<br>
+                    resp, err := client.<span class="function">Do</span>(req)
+                </div>
+                <p class="command-desc">net/http provides HTTP client and server implementations. Built-in routing, headers, cookies, and file serving.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-code"></i> encoding/json</h3>
+                <div class="command-code">
+                    <span class="comment">// Marshaling (struct to JSON)</span><br>
+                    <span class="keyword">type</span> Person <span class="keyword">struct</span> {<br>
+                    &nbsp;&nbsp;Name <span class="type">string</span> <span class="string">`json:"name"`</span><br>
+                    &nbsp;&nbsp;Age  <span class="type">int</span>    <span class="string">`json:"age"`</span><br>
+                    }<br>
+                    <br>
+                    p := Person{Name: <span class="string">"Alice"</span>, Age: 30}<br>
+                    jsonData, err := json.<span class="function">Marshal</span>(p)<br>
+                    <span class="comment">// {"name":"Alice","age":30}</span><br>
+                    <br>
+                    <span class="comment">// Pretty printing</span><br>
+                    jsonData, err := json.<span class="function">MarshalIndent</span>(p, <span class="string">""</span>, <span class="string">"  "</span>)<br>
+                    <br>
+                    <span class="comment">// Unmarshaling (JSON to struct)</span><br>
+                    <span class="keyword">var</span> p2 Person<br>
+                    err := json.<span class="function">Unmarshal</span>(jsonData, &p2)<br>
+                    <br>
+                    <span class="comment">// Streaming encoder/decoder</span><br>
+                    enc := json.<span class="function">NewEncoder</span>(os.Stdout)<br>
+                    enc.<span class="function">Encode</span>(p)<br>
+                    <br>
+                    dec := json.<span class="function">NewDecoder</span>(os.Stdin)<br>
+                    <span class="keyword">var</span> data <span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">interface</span>{}{}<br>
+                    dec.<span class="function">Decode</span>(&data)
+                </div>
+                <p class="command-desc">encoding/json provides JSON marshaling and unmarshaling. Use struct tags to customize field names and behavior.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-clock"></i> time Package</h3>
+                <div class="command-code">
+                    <span class="comment">// Current time</span><br>
+                    now := time.<span class="function">Now</span>()<br>
+                    <span class="function">fmt</span>.<span class="function">Println</span>(now.<span class="function">Year</span>(), now.<span class="function">Month</span>(), now.<span class="function">Day</span>())<br>
+                    <br>
+                    <span class="comment">// Creating time</span><br>
+                    t := time.<span class="function">Date</span>(2023, time.January, 10, 23, 0, 0, 0, time.UTC)<br>
+                    <br>
+                    <span class="comment">// Parsing time</span><br>
+                    t, err := time.<span class="function">Parse</span>(<span class="string">"2006-01-02"</span>, <span class="string">"2023-01-10"</span>)<br>
+                    t, err := time.<span class="function">Parse</span>(time.RFC3339, <span class="string">"2023-01-10T15:30:00Z"</span>)<br>
+                    <br>
+                    <span class="comment">// Formatting time</span><br>
+                    formatted := now.<span class="function">Format</span>(<span class="string">"2006-01-02 15:04:05"</span>)<br>
+                    formatted := now.<span class="function">Format</span>(time.RFC1123)<br>
+                    <br>
+                    <span class="comment">// Duration</span><br>
+                    duration := 2 * time.Hour + 30 * time.Minute<br>
+                    later := now.<span class="function">Add</span>(duration)<br>
+                    earlier := now.<span class="function">Add</span>(-duration)<br>
+                    <br>
+                    <span class="comment">// Timer and Ticker</span><br>
+                    timer := time.<span class="function">NewTimer</span>(2 * time.Second)<br>
+                    <-timer.C<br>
+                    <br>
+                    ticker := time.<span class="function">NewTicker</span>(1 * time.Second)<br>
+                    <span class="keyword">for</span> t := <span class="keyword">range</span> ticker.C {<br>
+                    &nbsp;&nbsp;<span class="function">fmt</span>.<span class="function">Println</span>(<span class="string">"Tick at"</span>, t)<br>
+                    }
+                </div>
+                <p class="command-desc">time package provides time measurement and display. Note: Use "2006-01-02 15:04:05" as reference time for formatting.</p>
+            </div>
+
+            <div class="command-card">
+                <h3 class="command-title"><i class="fas fa-random"></i> Other Useful Packages</h3>
+                <div class="command-code">
+                    <span class="comment">// strconv - string conversions</span><br>
+                    s := strconv.<span class="function">Itoa</span>(123)        <span class="comment">// "123"</span><br>
+                    i, err := strconv.<span class="function">Atoi</span>(<span class="string">"456"</span>) <span class="comment">// 456</span><br>
+                    b, err := strconv.<span class="function">ParseBool</span>(<span class="string">"true"</span>)<br>
+                    f, err := strconv.<span class="function">ParseFloat</span>(<span class="string">"3.14"</span>, 64)<br>
+                    <br>
+                    <span class="comment">// strings - string manipulation</span><br>
+                    contains := strings.<span class="function">Contains</span>(<span class="string">"hello"</span>, <span class="string">"ell"</span>)<br>
+                    count := strings.<span class="function">Count</span>(<span class="string">"cheese"</span>, <span class="string">"e"</span>)<br>
+                    fields := strings.<span class="function">Fields</span>(<span class="string">"a b c"</span>)     <span class="comment">// ["a", "b", "c"]</span><br>
+                    lower := strings.<span class="function">ToLower</span>(<span class="string">"HELLO"</span>)<br>
+                    replaced := strings.<span class="function">Replace</span>(<span class="string">"foo"</span>, <span class="string">"o"</span>, <span class="string">"a"</span>, -1)<br>
+                    <br>
+                    <span class="comment">// regexp - regular expressions</span><br>
+                    matched, err := regexp.<span class="function">MatchString</span>(<span class="string">"^[a-z]+$"</span>, <span class="string">"hello"</span>)<br>
+                    re := regexp.<span class="function">MustCompile</span>(<span class="string">`^\d+$`</span>)<br>
+                    matches := re.<span class="function">FindString</span>(<span class="string">"123 abc"</span>)  <span class="comment">// "123"</span><br>
+                    <br>
+                    <span class="comment">// path/filepath - file paths</span><br>
+                    dir := filepath.<span class="function">Dir</span>(<span class="string">"/home/user/file.txt"</span>)<br>
+                    base := filepath.<span class="function">Base</span>(<span class="string">"/home/user/file.txt"</span>)<br>
+                    ext := filepath.<span class="function">Ext</span>(<span class="string">"file.txt"</span>)<br>
+                    abs, err := filepath.<span class="function">Abs</span>(<span class="string">"file.txt"</span>)
+                </div>
+                <p class="command-desc">Go's standard library is extensive. Key packages include strconv, strings, regexp, path/filepath, and many more for common tasks.</p>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">Go Best Practices Summary</div>
+            <p>• Use <span class="highlight">gofmt</span> to format code automatically</p>
+            <p>• Handle errors explicitly (don't ignore them)</p>
+            <p>• Prefer composition over inheritance</p>
+            <p>• Return errors, don't panic (except for unrecoverable errors)</p>
+            <p>• Use interfaces for abstraction and testing</p>
+            <p>• Keep packages small and focused on single responsibility</p>
+            <p>• Write tests (use testing package)</p>
+            <p>• Use go vet and staticcheck for code analysis</p>
+            <p>• Document exported functions and types with comments</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Go (Golang) Cheatsheet &copy; 2023 | Complete reference for Go developers</p>
+        <p>Remember: <span class="highlight">go fmt</span> your code and <span class="highlight">go test</span> often!</p>
+        <p style="margin-top: 15px; font-size: 0.9rem;">Go version referenced: 1.21 | Standard library coverage: Comprehensive</p>
+    </footer>
+</div>
+
+<div class="back-to-top" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
+<script>
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Update active tab button
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Show target content section
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetTab) {
+                    section.classList.add('active');
+                }
+            });
+
+            // Scroll to top of section
+            document.getElementById(targetTab).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+
+        if (searchTerm.length < 2) {
+            // Show all if search term is too short
+            contentSections.forEach(section => {
+                section.style.display = 'block';
+                const commandCards = section.querySelectorAll('.command-card');
+                commandCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+            });
+            return;
+        }
+
+        contentSections.forEach(section => {
+            const commandCards = section.querySelectorAll('.command-card');
+            let sectionHasMatch = false;
+
+            commandCards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                const isVisible = cardText.includes(searchTerm);
+
+                card.style.display = isVisible ? 'block' : 'none';
+
+                if (isVisible) {
+                    sectionHasMatch = true;
+                    // Highlight matching text
+                    highlightText(card, searchTerm);
+                } else {
+                    removeHighlights(card);
+                }
+            });
+
+            // Show/hide section based on matches
+            if (sectionHasMatch) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // If search is cleared, show all content
+        if (searchTerm === '') {
+            contentSections.forEach(section => {
+                section.style.display = 'block';
+                const commandCards = section.querySelectorAll('.command-card');
+                commandCards.forEach(card => {
+                    card.style.display = 'block';
+                    removeHighlights(card);
+                });
+            });
+        }
+    });
+
+    // Simple text highlighting
+    function highlightText(element, searchTerm) {
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+
+        let node;
+        while (node = walker.nextNode()) {
+            const text = node.nodeValue;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            const newText = text.replace(regex, '<mark class="highlight">$1</mark>');
+
+            if (newText !== text) {
+                const span = document.createElement('span');
+                span.innerHTML = newText;
+                node.parentNode.replaceChild(span, node);
+            }
+        }
+    }
+
+    function removeHighlights(element) {
+        const highlights = element.querySelectorAll('mark.highlight');
+        highlights.forEach(highlight => {
+            const parent = highlight.parentNode;
+            parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+            // Normalize to merge adjacent text nodes
+            parent.normalize();
+        });
+    }
+
+    // Back to top functionality
+    const backToTopButton = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTopButton.style.display = 'flex';
+        } else {
+            backToTopButton.style.display = 'none';
+        }
+    });
+
+    backToTopButton.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+</script>
+
+{{end }}
+
