@@ -1,0 +1,166 @@
+{{ define "content" }}
+
+<section class="life-ledger">
+
+    <h1 class="life-title">10,894 Days</h1>
+    <p class="life-subtitle">
+        A finite system running without pause.<br>
+        No retries. No rollbacks.
+    </p>
+
+    <div class="life-core">
+        <div class="life-block now">
+            <span class="label">CURRENT STATE</span>
+            <span class="value" id="today"></span>
+        </div>
+
+        <div class="life-block end">
+            <span class="label">VERSION 60.0</span>
+            <span class="value">09 · 11 · 2055</span>
+        </div>
+    </div>
+
+    <div class="countdown-container">
+        <h2 class="countdown-title">Remaining Execution Time</h2>
+        <div class="countdown-days" id="countdown">
+            — days —:—:—
+        </div>
+        <p class="countdown-note">
+            Each second is committed.<br>
+            This ledger never reverts.
+        </p>
+    </div>
+
+    <div class="life-philosophy">
+        <p>
+            You are not losing time.
+            <br>
+            Time is executing you — one instruction per second.
+        </p>
+
+        <p>
+            No garbage collection for regret.<br>
+            No checkpoint before courage.
+        </p>
+
+        <p class="highlight">
+            Optimize for meaning.<br>
+            Latency is life.
+        </p>
+    </div>
+
+    <div class="life-footer">
+        <span>— A personal uptime monitor</span>
+    </div>
+
+</section>
+
+<script>
+    (function () {
+        const end = new Date("2055-11-09T00:00:00").getTime();
+        const countdownEl = document.getElementById("countdown");
+        const todayEl = document.getElementById("today");
+
+        function tick() {
+            const now = Date.now();
+            const diff = end - now;
+
+            if (diff <= 0) {
+                countdownEl.innerText = "TIME EXHAUSTED";
+                return;
+            }
+
+            const totalSeconds = Math.floor(diff / 1000);
+
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            countdownEl.innerText =
+                days.toLocaleString() + " days  " +
+                String(hours).padStart(2, "0") + ":" +
+                String(minutes).padStart(2, "0") + ":" +
+                String(seconds).padStart(2, "0");
+
+            todayEl.innerText = new Date().toDateString();
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>
+
+<style>
+    .life-ledger {
+        max-width: 800px;
+        margin: auto;
+        padding: 4rem 1rem;
+        text-align: center;
+        font-family: system-ui, monospace;
+    }
+
+    .life-title {
+        font-size: 3rem;
+        letter-spacing: 0.1em;
+    }
+
+    .life-subtitle {
+        opacity: 0.7;
+        margin-bottom: 3rem;
+    }
+
+    .life-core {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .life-block {
+        border: 1px solid #333;
+        padding: 1rem;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .life-block .label {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.6;
+    }
+
+    .life-block .value {
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
+    }
+
+    .countdown-container {
+        margin: 3rem 0;
+    }
+
+    .countdown-days {
+        font-size: 3.5rem;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+    }
+
+    .life-philosophy p {
+        margin: 1.5rem 0;
+        line-height: 1.6;
+    }
+
+    .life-philosophy .highlight {
+        font-weight: bold;
+        letter-spacing: 0.05em;
+    }
+
+    .life-footer {
+        margin-top: 4rem;
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
+</style>
+
+{{ end }}

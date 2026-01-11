@@ -70,6 +70,10 @@ func main() {
 		render(w, "gitcheatsheet.html", "Git Cheat Sheet", nil)
 	})
 
+	http.HandleFunc("/life-tradeoff/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "age.html", "Life Trade Off", nil)
+	})
+
 	http.HandleFunc("/distributed-universe/", func(w http.ResponseWriter, r *http.Request) {
 		renderUniverse(w, "distributed-universe.html", "Distributed System Universe", nil)
 	})
