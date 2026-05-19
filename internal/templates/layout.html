@@ -12,22 +12,67 @@
     <div class="header-inner">
         <nav class="top-nav">
             <a href="javascript:history.back()" class="nav-back" title="Back" aria-label="Go back">
-                ←
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </a>
 
             <div class="nav-links">
-                <a href="/" title="Home" aria-label="Home">[ HOME ]</a>
-                <a href="/distributed-universe/" class="active" title="Distributed Systems Universe" aria-label="Distributed Systems">[ DISTRIBUTED UNIVERSE ]</a>
-                <a href="/go-cheat-sheet/" title="Go Cheat Sheet" aria-label="Go">[ Go ]</a>
-                <a href="/git-cheat-sheet/" title="Git Cheat Sheet" aria-label="Git">[ GIT ]</a>
+                <a href="/" title="Home" aria-label="Home">Home</a>
+                <a href="/writings" title="Writing" aria-label="Writing">Blog</a>
+                <a href="/go-cheat-sheet/" title="Go Cheat Sheet" aria-label="Go">Go</a>
+                <a href="/go-tips/" title="Useful Go Tips" aria-label="Go Tips">Go Tips</a>
+                <a href="/tools/" id="tools-trigger" title="Developer Tools" aria-label="Dev Tools">
+                    Tools <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-left: 2px;"><path d="m6 9 6 6 6-6"/></svg>
+                </a>
+                <a href="/git-cheat-sheet/" title="Git Cheat Sheet" aria-label="Git">Git</a>
             </div>
 
-            <button class="universe-controls-toggle" id="controlsToggle" aria-label="Show Controls">
-                ⚙️
+            <button class="universe-controls-toggle" id="controlsToggle" aria-label="Show Controls" style="background:none;border:none;color:var(--text-primary);cursor:pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="mobile-menu-toggle" aria-label="Menu" style="margin-left:10px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
         </nav>
     </div>
 </header>
+
+<!-- Mega menu lives outside header to avoid backdrop-filter clipping -->
+<div class="mega-menu" id="mega-menu">
+    <div class="mega-menu-inner">
+        <div>
+            <div class="mega-col-title"><i class="fas fa-tools" style="margin-right:6px;"></i>General Tools</div>
+            <a href="/tools/qr" class="mega-link"><i class="fas fa-qrcode"></i> QR Generator</a>
+            <a href="/tools/json" class="mega-link"><i class="fas fa-code"></i> JSON Formatter</a>
+            <a href="/tools/jwt" class="mega-link"><i class="fas fa-key"></i> JWT Decoder</a>
+            <a href="/tools/regex" class="mega-link"><i class="fas fa-search"></i> Regex Tester</a>
+            <a href="/tools/cron" class="mega-link"><i class="fas fa-clock"></i> Cron Generator</a>
+            <a href="/tools/uuid" class="mega-link"><i class="fas fa-fingerprint"></i> UUID Generator</a>
+            <a href="/tools/hash" class="mega-link"><i class="fas fa-hashtag"></i> Hash Generator</a>
+        </div>
+        <div>
+            <div class="mega-col-title"><i class="fas fa-rupee-sign" style="margin-right:6px;"></i>India Utilities</div>
+            <a href="/tools/upi" class="mega-link"><i class="fas fa-rupee-sign"></i> UPI QR Generator</a>
+            <a href="/tools/emi" class="mega-link"><i class="fas fa-home"></i> EMI Calculator</a>
+            <a href="/tools/gst" class="mega-link"><i class="fas fa-file-invoice-dollar"></i> GST Calculator</a>
+            <a href="/tools/photo-resizer" class="mega-link"><i class="fas fa-id-card"></i> Photo Resizer</a>
+            <a href="/tools/pdf-compressor" class="mega-link"><i class="fas fa-file-pdf"></i> PDF Compressor</a>
+        </div>
+        <div>
+            <div class="mega-col-title"><i class="fas fa-paint-brush" style="margin-right:6px;"></i>Frontend Tools</div>
+            <a href="/tools/palette" class="mega-link"><i class="fas fa-palette"></i> Palette Generator</a>
+            <a href="/tools/gradient" class="mega-link"><i class="fas fa-fill-drip"></i> Gradient Generator</a>
+            <a href="/tools/shadow" class="mega-link"><i class="fas fa-layer-group"></i> Shadow Generator</a>
+            <a href="/tools/sql" class="mega-link"><i class="fas fa-database"></i> SQL Formatter</a>
+        </div>
+        <div>
+            <div class="mega-col-title"><i class="fas fa-bolt" style="margin-right:6px;"></i>Productivity</div>
+            <a href="/tools/notes" class="mega-link"><i class="fas fa-sticky-note"></i> Temporary Notes</a>
+            <a href="/tools/secret" class="mega-link"><i class="fas fa-bomb"></i> One-Time Secret</a>
+            <a href="/tools/clipboard" class="mega-link"><i class="fas fa-clipboard"></i> Clipboard Sync</a>
+            <a href="/tools/timezone" class="mega-link"><i class="fas fa-globe"></i> Timezone Converter</a>
+        </div>
+    </div>
+</div>
 
 <main class="site-main universe-container">
     {{ template "content" . }}
@@ -36,7 +81,7 @@
 <!-- Control Panel -->
 <div class="universe-controls" id="universeControls">
     <div class="controls-header">
-        <h3>🌌 Distributed Systems Universe</h3>
+        <h3>🌌 Distributed Systems</h3>
         <button class="close-controls" id="closeControls">×</button>
     </div>
 
@@ -46,16 +91,14 @@
             <label for="speedControl">Rotation Speed:</label>
             <input type="range" id="speedControl" min="0.1" max="2" step="0.1" value="1">
         </div>
-
         <div class="control-group">
             <label for="particleControl">Particle Density:</label>
             <input type="range" id="particleControl" min="10" max="100" step="10" value="50">
         </div>
-
         <div class="control-group">
             <label>
                 <input type="checkbox" id="showConnections" checked>
-                Show Network Connections
+                Show Network
             </label>
         </div>
     </div>
@@ -67,14 +110,14 @@
             <button class="filter-btn" data-filter="consensus">Consensus</button>
             <button class="filter-btn" data-filter="storage">Storage</button>
             <button class="filter-btn" data-filter="messaging">Messaging</button>
-            <button class="filter-btn" data-filter="coordination">Coordination</button>
+            <button class="filter-btn" data-filter="coordination">Coord.</button>
         </div>
     </div>
 
     <div class="controls-section">
         <h4>Learning Mode</h4>
         <div class="control-group">
-            <button id="tourBtn" class="action-btn">🎓 Start Guided Tour</button>
+            <button id="tourBtn" class="action-btn">🎓 Guided Tour</button>
             <button id="quizBtn" class="action-btn">❓ Quick Quiz</button>
         </div>
     </div>
@@ -86,9 +129,7 @@
         <h3 id="conceptTitle"></h3>
         <button class="close-knowledge" id="closeKnowledge">×</button>
     </div>
-    <div class="knowledge-content" id="conceptContent">
-        <!-- Content loaded dynamically -->
-    </div>
+    <div class="knowledge-content" id="conceptContent"></div>
     <div class="knowledge-footer">
         <div class="difficulty">
             <span class="diff-label">Difficulty:</span>
@@ -124,10 +165,40 @@
     document.getElementById('controlsToggle').addEventListener('click', () => {
         document.getElementById('universeControls').classList.toggle('visible');
     });
-
     document.getElementById('closeControls').addEventListener('click', () => {
         document.getElementById('universeControls').classList.remove('visible');
     });
+
+    // Mega menu: trigger is the Tools link, menu is #mega-menu outside header
+    (function() {
+        const trigger = document.getElementById('tools-trigger');
+        const menu = document.getElementById('mega-menu');
+        if (!trigger || !menu) return;
+
+        let hideTimer = null;
+
+        function showMenu() {
+            clearTimeout(hideTimer);
+            menu.classList.add('is-open');
+        }
+
+        function scheduleHide() {
+            hideTimer = setTimeout(() => {
+                menu.classList.remove('is-open');
+            }, 200);
+        }
+
+        trigger.addEventListener('mouseenter', showMenu);
+        trigger.addEventListener('mouseleave', scheduleHide);
+        menu.addEventListener('mouseenter', showMenu);
+        menu.addEventListener('mouseleave', scheduleHide);
+
+        document.addEventListener('click', (e) => {
+            if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('is-open');
+            }
+        });
+    })();
 </script>
 </body>
 </html>

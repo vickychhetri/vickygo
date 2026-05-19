@@ -1,0 +1,110 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Load sql-formatter -->
+<script src="https://unpkg.com/sql-formatter@15.3.0/dist/sql-formatter.min.js"></script>
+<style>
+    .tool-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .workspace { display: flex; flex-direction: column; gap: 20px; }
+    
+    .toolbar { display: flex; gap: 10px; background: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); align-items: center; flex-wrap: wrap;}
+    
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-color);}
+    .btn:hover { background: rgba(0,0,0,0.05); border-color: var(--text-secondary); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); color: #fff; border-color: var(--accent-hover);}
+    
+    .editor-container { display: flex; gap: 20px; height: 60vh; min-height: 400px; }
+    @media (max-width: 800px) { .editor-container { flex-direction: column; height: auto; } }
+    
+    .pane { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; }
+    .pane-header { background: var(--bg-main); padding: 10px 15px; border-bottom: 1px solid var(--border-color); font-weight: 500; font-size: 0.9rem; color: var(--text-secondary); display: flex; justify-content: space-between;}
+    
+    textarea { flex: 1; width: 100%; resize: none; border: none; background: var(--bg-main); color: var(--text-primary); padding: 15px; font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.5; outline: none; }
+    
+    .toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-main); padding: 12px 24px; border-radius: 8px; font-weight: bold; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000;}
+    .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>SQL Formatter</h1>
+        <p>Beautify messy SQL queries into readable formats or minify them securely in your browser.</p>
+    </div>
+
+    <div class="workspace">
+        <div class="toolbar">
+            <select id="sql-dialect" class="btn">
+                <option value="sql">Standard SQL</option>
+                <option value="postgresql">PostgreSQL</option>
+                <option value="mysql">MySQL</option>
+                <option value="mariadb">MariaDB</option>
+                <option value="sqlite">SQLite</option>
+            </select>
+            <button class="btn btn-primary" id="btn-format"><i class="fas fa-magic"></i> Format SQL</button>
+            <button class="btn" id="btn-minify"><i class="fas fa-compress-alt"></i> Minify</button>
+            <button class="btn" id="btn-clear" style="margin-left: auto;"><i class="fas fa-trash"></i> Clear</button>
+        </div>
+
+        <div class="editor-container">
+            <div class="pane">
+                <div class="pane-header">Input SQL</div>
+                <textarea id="sql-input" placeholder="SELECT * FROM users WHERE active=1 AND created_at > '2020-01-01'"></textarea>
+            </div>
+            <div class="pane">
+                <div class="pane-header">
+                    <span>Output</span>
+                    <i class="fas fa-copy" style="cursor:pointer;" id="btn-copy" title="Copy to clipboard"></i>
+                </div>
+                <textarea id="sql-output" readonly placeholder="Formatted SQL will appear here"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+    const input = document.getElementById('sql-input');
+    const output = document.getElementById('sql-output');
+    const dialect = document.getElementById('sql-dialect');
+
+    document.getElementById('btn-format').addEventListener('click', () => {
+        try {
+            const formatted = sqlFormatter.format(input.value, {
+                language: dialect.value,
+                uppercase: true,
+                linesBetweenQueries: 2,
+            });
+            output.value = formatted;
+        } catch (e) {
+            output.value = "Error parsing SQL: \n" + e.message;
+        }
+    });
+
+    document.getElementById('btn-minify').addEventListener('click', () => {
+        // Simple minify strategy: replace multiple newlines and spaces with single spaces
+        let minified = input.value
+            .replace(/\n/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        output.value = minified;
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+        input.value = '';
+        output.value = '';
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+        if(!output.value) return;
+        navigator.clipboard.writeText(output.value);
+        
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+</script>
+{{ end }}

@@ -1,0 +1,128 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<style>
+    .tool-container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); text-align: center;}
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; text-align: center;}
+    
+    .panel { background: var(--bg-card); padding: 40px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;}
+    
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 50px 20px; text-align: center; cursor: pointer; transition: border-color 0.3s; margin-bottom: 30px; }
+    .drop-zone:hover { border-color: var(--accent); background: rgba(45, 212, 191, 0.02);}
+    
+    .status-area { margin-top: 20px; text-align: left; background: var(--bg-main); padding: 20px; border-radius: 8px; display: none; }
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
+    
+    .btn { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: opacity 0.2s; margin-top: 20px;}
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .loader { border: 3px solid rgba(0,0,0,0.1); border-top: 3px solid #000; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px;}
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Resume PDF Compressor</h1>
+        <p>Compress your PDF locally in the browser to bypass job portal file size limits.</p>
+    </div>
+
+    <div class="panel">
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-file-pdf" style="font-size: 4rem; color: #f87171; margin-bottom: 20px;"></i>
+            <h3 style="margin-bottom: 10px;">Click or Drag Resume PDF</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Files are processed securely in your browser and are never uploaded.</p>
+            <div id="file-name" style="color: var(--accent); margin-top: 15px; font-weight: bold;"></div>
+        </div>
+        <input type="file" id="file-input" accept="application/pdf" style="display:none;">
+
+        <div class="status-area" id="status-area">
+            <div class="stat-row">
+                <span style="color: var(--text-secondary);">Original Size:</span>
+                <span id="stat-orig" style="color: var(--text-primary); font-weight: bold;">-</span>
+            </div>
+            <div class="stat-row">
+                <span style="color: var(--text-secondary);">Compressed Size:</span>
+                <span id="stat-new" style="color: #4ade80; font-weight: bold;">-</span>
+            </div>
+            <div class="stat-row">
+                <span style="color: var(--text-secondary);">Space Saved:</span>
+                <span id="stat-saved" style="color: var(--accent); font-weight: bold;">-</span>
+            </div>
+            
+            <button class="btn" id="btn-download" disabled>
+                <i class="fas fa-download"></i> Download Compressed PDF
+            </button>
+        </div>
+        
+        <div id="loading" style="display:none; margin-top: 20px; color: var(--accent);">
+            <div class="loader"></div> Compressing PDF...
+        </div>
+    </div>
+</div>
+
+<script>
+    let originalFile = null;
+    let compressedBlob = null;
+
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        originalFile = file;
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('stat-orig').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+        
+        document.getElementById('status-area').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+        
+        // Use timeout to allow UI to update before heavy processing
+        setTimeout(() => compressPDF(file), 100);
+    });
+
+    async function compressPDF(file) {
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            
+            // Load the PDF using pdf-lib
+            // This implicitly strips some unused objects
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+            
+            // Save it back with useObjectStreams to compress structure
+            const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+            
+            compressedBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+            
+            const oldSize = file.size;
+            const newSize = compressedBlob.size;
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('status-area').style.display = 'block';
+            
+            document.getElementById('stat-new').textContent = (newSize / 1024 / 1024).toFixed(2) + ' MB';
+            
+            if (newSize < oldSize) {
+                const percent = ((oldSize - newSize) / oldSize * 100).toFixed(1);
+                document.getElementById('stat-saved').textContent = percent + '%';
+            } else {
+                document.getElementById('stat-saved').textContent = "Already Optimized";
+                document.getElementById('stat-saved').style.color = '#f87171';
+            }
+            
+            const btn = document.getElementById('btn-download');
+            btn.disabled = false;
+            btn.onclick = () => {
+                const url = URL.createObjectURL(compressedBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name.replace('.pdf', '_compressed.pdf');
+                a.click();
+            };
+        } catch (e) {
+            document.getElementById('loading').style.display = 'none';
+            alert("Error parsing PDF. Ensure it is not password protected.");
+        }
+    }
+</script>
+{{ end }}

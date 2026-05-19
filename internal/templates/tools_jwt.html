@@ -1,0 +1,173 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    .tool-header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--accent);
+    }
+    .tool-header p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .jwt-workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    @media (max-width: 900px) {
+        .jwt-workspace { grid-template-columns: 1fr; }
+    }
+    .encoded-section textarea {
+        width: 100%;
+        height: 300px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        resize: vertical;
+        word-break: break-all;
+    }
+    .encoded-section textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    .decoded-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .jwt-part {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .jwt-part-header {
+        padding: 10px 15px;
+        font-weight: 600;
+        font-family: var(--font-mono);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .header-red { color: #f87171; border-bottom-color: #f8717133; background: rgba(248, 113, 113, 0.05); }
+    .header-purple { color: #c084fc; border-bottom-color: #c084fc33; background: rgba(192, 132, 252, 0.05); }
+    .header-blue { color: #60a5fa; border-bottom-color: #60a5fa33; background: rgba(96, 165, 250, 0.05); }
+    
+    .jwt-part pre {
+        margin: 0;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        color: var(--text-primary);
+        overflow-x: auto;
+    }
+    .status-banner {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        display: none;
+        font-weight: 500;
+    }
+    .status-valid { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid #4ade8055; }
+    .status-invalid { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid #f8717155; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>JWT Decoder</h1>
+        <p>Decode JSON Web Tokens instantly. Verify token expiry and inspect headers/payload locally.</p>
+    </div>
+
+    <div class="jwt-workspace">
+        <div class="encoded-section">
+            <h3 style="margin-bottom: 15px;">Encoded (Paste JWT here)</h3>
+            <textarea id="jwt-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+            
+            <div id="jwt-status" class="status-banner"></div>
+        </div>
+        
+        <div class="decoded-section">
+            <h3 style="margin-bottom: 5px;">Decoded</h3>
+            
+            <div class="jwt-part">
+                <div class="jwt-part-header header-red">HEADER: ALGORITHM & TOKEN TYPE</div>
+                <pre id="jwt-header">{}</pre>
+            </div>
+            
+            <div class="jwt-part">
+                <div class="jwt-part-header header-purple">PAYLOAD: DATA</div>
+                <pre id="jwt-payload">{}</pre>
+            </div>
+            
+            <div class="jwt-part">
+                <div class="jwt-part-header header-blue">VERIFY SIGNATURE</div>
+                <pre id="jwt-sig">Signature string...</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function parseJwt(token) {
+        try {
+            const parts = token.split('.');
+            if (parts.length !== 3) throw new Error("Invalid JWT format");
+            
+            const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            const signature = parts[2];
+            
+            return { header, payload, signature };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    const jwtInput = document.getElementById('jwt-input');
+    const jwtStatus = document.getElementById('jwt-status');
+    
+    jwtInput.addEventListener('input', () => {
+        const token = jwtInput.value.trim();
+        if (!token) {
+            document.getElementById('jwt-header').textContent = '{}';
+            document.getElementById('jwt-payload').textContent = '{}';
+            document.getElementById('jwt-sig').textContent = 'Signature string...';
+            jwtStatus.style.display = 'none';
+            return;
+        }
+        
+        const decoded = parseJwt(token);
+        if (decoded) {
+            document.getElementById('jwt-header').textContent = JSON.stringify(decoded.header, null, 2);
+            document.getElementById('jwt-payload').textContent = JSON.stringify(decoded.payload, null, 2);
+            document.getElementById('jwt-sig').textContent = decoded.signature;
+            
+            // Check expiry
+            if (decoded.payload.exp) {
+                const expDate = new Date(decoded.payload.exp * 1000);
+                const now = new Date();
+                jwtStatus.style.display = 'block';
+                if (now > expDate) {
+                    jwtStatus.className = 'status-banner status-invalid';
+                    jwtStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Token Expired at ${expDate.toLocaleString()}`;
+                } else {
+                    jwtStatus.className = 'status-banner status-valid';
+                    jwtStatus.innerHTML = `<i class="fas fa-check-circle"></i> Token Valid until ${expDate.toLocaleString()}`;
+                }
+            } else {
+                jwtStatus.style.display = 'none';
+            }
+        } else {
+            jwtStatus.style.display = 'block';
+            jwtStatus.className = 'status-banner status-invalid';
+            jwtStatus.innerHTML = `<i class="fas fa-times-circle"></i> Invalid JWT format`;
+        }
+    });
+</script>
+{{ end }}

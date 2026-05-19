@@ -1,0 +1,186 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .photo-workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    @media (max-width: 800px) { .photo-workspace { grid-template-columns: 1fr; } }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
+    
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color 0.3s; margin-bottom: 20px; }
+    .drop-zone:hover { border-color: var(--accent); }
+    
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .preset-btn { background: var(--bg-main); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; color: var(--text-primary); cursor: pointer; text-align: center; font-size: 0.9rem; transition: all 0.2s; }
+    .preset-btn:hover { border-color: var(--accent); }
+    .preset-btn.active { background: rgba(45, 212, 191, 0.1); border-color: var(--accent); color: var(--accent); }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; }
+    .form-group input:focus { border-color: var(--accent); }
+    
+    .preview-box { width: 100%; height: 300px; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 20px; position: relative;}
+    .preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+    
+    .btn { width: 100%; padding: 12px; background: var(--accent); color: #000; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>India Photo & Signature Resizer</h1>
+        <p>Resize and compress photos for Aadhaar, PAN, Passport, and Govt Exams locally without uploading.</p>
+    </div>
+
+    <div class="photo-workspace">
+        <div class="panel">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-image" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+                <p>Click or drag image here</p>
+                <div id="file-name" style="color: var(--text-secondary); margin-top: 10px; font-size: 0.8rem;"></div>
+            </div>
+            <input type="file" id="file-input" accept="image/jpeg, image/png" style="display:none;">
+
+            <label style="display:block; margin-bottom: 10px; font-weight: 500;">Presets</label>
+            <div class="preset-grid">
+                <div class="preset-btn active" data-w="413" data-h="531" data-kb="50">Passport (3.5x4.5cm) <br><small>&lt; 50KB</small></div>
+                <div class="preset-btn" data-w="256" data-h="64" data-kb="20">Signature <br><small>&lt; 20KB</small></div>
+                <div class="preset-btn" data-w="600" data-h="600" data-kb="100">PAN Card <br><small>&lt; 100KB</small></div>
+                <div class="preset-btn" data-w="800" data-h="600" data-kb="300">Govt ID Proof <br><small>&lt; 300KB</small></div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1">
+                    <label>Width (px)</label>
+                    <input type="number" id="inp-w" value="413">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Height (px)</label>
+                    <input type="number" id="inp-h" value="531">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Target Size (Max KB)</label>
+                <input type="number" id="inp-kb" value="50">
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3 style="margin-bottom: 15px;">Preview</h3>
+            <div class="preview-box">
+                <img id="preview-img" style="display:none;">
+                <span id="preview-placeholder" style="color:var(--text-secondary);">Processed image will appear here</span>
+            </div>
+            
+            <div class="stat-row">
+                <span style="color: var(--text-secondary);">Original Size:</span>
+                <span id="stat-orig" style="color: var(--text-primary); font-weight: 500;">-</span>
+            </div>
+            <div class="stat-row">
+                <span style="color: var(--text-secondary);">New Size:</span>
+                <span id="stat-new" style="color: var(--accent); font-weight: 500;">-</span>
+            </div>
+            
+            <button class="btn" id="btn-download" disabled style="margin-top: 20px;">
+                <i class="fas fa-download"></i> Download Image
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let originalImage = new Image();
+    let originalFile = null;
+    let finalBlob = null;
+
+    const inpW = document.getElementById('inp-w');
+    const inpH = document.getElementById('inp-h');
+    const inpKb = document.getElementById('inp-kb');
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            inpW.value = btn.dataset.w;
+            inpH.value = btn.dataset.h;
+            inpKb.value = btn.dataset.kb;
+            processImage();
+        });
+    });
+
+    [inpW, inpH, inpKb].forEach(el => el.addEventListener('change', processImage));
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        originalFile = file;
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('stat-orig').textContent = (file.size / 1024).toFixed(2) + ' KB';
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            originalImage.onload = () => {
+                document.getElementById('preview-placeholder').style.display = 'none';
+                document.getElementById('preview-img').style.display = 'block';
+                processImage();
+            };
+            originalImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function processImage() {
+        if (!originalImage.src) return;
+
+        const w = parseInt(inpW.value) || originalImage.width;
+        const h = parseInt(inpH.value) || originalImage.height;
+        const targetKb = parseFloat(inpKb.value) || 50;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        
+        // Fill white background for transparent PNGs converted to JPEG
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(originalImage, 0, 0, w, h);
+
+        let quality = 0.95;
+        let step = 0.05;
+        
+        function tryCompress() {
+            canvas.toBlob((blob) => {
+                const currentKb = blob.size / 1024;
+                if (currentKb > targetKb && quality > 0.1) {
+                    quality -= step;
+                    tryCompress();
+                } else {
+                    finalBlob = blob;
+                    document.getElementById('stat-new').textContent = currentKb.toFixed(2) + ' KB';
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('preview-img').src = url;
+                    
+                    const btn = document.getElementById('btn-download');
+                    btn.disabled = false;
+                    btn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `resized_${w}x${h}.jpg`;
+                        a.click();
+                    };
+                }
+            }, 'image/jpeg', quality);
+        }
+        
+        tryCompress();
+    }
+</script>
+{{ end }}

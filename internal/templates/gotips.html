@@ -1,0 +1,75 @@
+{{ define "content" }}
+
+<section class="writing">
+    <div class="writing-header">
+        <h2>Useful Go Tips & Tricks</h2>
+        <p class="writing-subtitle">A collection of highly practical Go language patterns and utilities.</p>
+    </div>
+
+    <article class="post-container" style="max-width: 100%;">
+        <div class="post-content">
+            <h3>1. The Functional Options Pattern</h3>
+            <p>Instead of passing a large config struct or multiple parameters, use functional options to make your API clean and extensible.</p>
+            <pre><code>type Server struct {
+    host string
+    port int
+    timeout time.Duration
+}
+
+type Option func(*Server)
+
+func WithTimeout(d time.Duration) Option {
+    return func(s *Server) { s.timeout = d }
+}
+
+func NewServer(host string, port int, opts ...Option) *Server {
+    s := &Server{host: host, port: port, timeout: 30 * time.Second}
+    for _, opt := range opts { opt(s) }
+    return s
+}</code></pre>
+
+            <h3>2. Slice Filtering without Allocation</h3>
+            <p>You can filter a slice in place without allocating a new underlying array.</p>
+            <pre><code>func Filter(s []int, keep func(int) bool) []int {
+    n := 0
+    for _, x := range s {
+        if keep(x) {
+            s[n] = x
+            n++
+        }
+    }
+    return s[:n]
+}</code></pre>
+
+            <h3>3. WaitGroup Wrapper for Goroutines</h3>
+            <p>A cleaner way to handle goroutines using a WaitGroup to prevent panic from leaving the WaitGroup unbalanced.</p>
+            <pre><code>func RunSafe(wg *sync.WaitGroup, fn func()) {
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        defer func() {
+            if err := recover(); err != nil {
+                log.Printf("Recovered from panic: %v", err)
+            }
+        }()
+        fn()
+    }()
+}</code></pre>
+
+            <h3>4. Using Empty Structs for Sets</h3>
+            <p>Since Go doesn't have a built-in Set type, you can use a map with empty structs to save memory, as `struct{}` takes 0 bytes.</p>
+            <pre><code>type Set map[string]struct{}
+
+func main() {
+    mySet := make(Set)
+    mySet["apple"] = struct{}{}
+    
+    if _, exists := mySet["apple"]; exists {
+        fmt.Println("Apple is in the set!")
+    }
+}</code></pre>
+        </div>
+    </article>
+</section>
+
+{{ end }}

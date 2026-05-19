@@ -1,0 +1,136 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); text-align: center;}
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; text-align: center;}
+    
+    .panel { background: var(--bg-card); padding: 40px; border-radius: 12px; border: 1px solid var(--border-color); }
+    
+    .calc-type { display: flex; background: var(--bg-main); border-radius: 8px; padding: 5px; margin-bottom: 30px; }
+    .type-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 6px; color: var(--text-secondary); transition: all 0.2s; font-weight: 500;}
+    .type-btn.active { background: var(--accent); color: #000; }
+    
+    .form-group { margin-bottom: 25px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500; font-size: 1.1rem;}
+    
+    .amount-input { width: 100%; padding: 15px; font-size: 1.5rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); outline: none; }
+    .amount-input:focus { border-color: var(--accent); }
+    
+    .gst-slabs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .slab-btn { flex: 1; padding: 15px 10px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; text-align: center; font-weight: bold; font-size: 1.1rem; transition: all 0.2s; }
+    .slab-btn:hover { border-color: var(--accent); }
+    .slab-btn.active { background: rgba(45, 212, 191, 0.1); border-color: var(--accent); color: var(--accent); }
+    
+    .results { margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 30px; }
+    .result-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2rem; }
+    .result-row.total { font-size: 1.8rem; font-weight: bold; color: var(--accent); margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>GST Calculator</h1>
+        <p>Easily calculate GST (Goods and Services Tax) for Indian businesses.</p>
+    </div>
+
+    <div class="panel">
+        <div class="calc-type">
+            <div class="type-btn active" data-type="add">Add GST (Exclusive)</div>
+            <div class="type-btn" data-type="remove">Remove GST (Inclusive)</div>
+        </div>
+
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="inp-amount" class="amount-input" placeholder="0" value="1000">
+        </div>
+
+        <div class="form-group">
+            <label>GST Slab Rate</label>
+            <div class="gst-slabs">
+                <div class="slab-btn" data-rate="5">5%</div>
+                <div class="slab-btn" data-rate="12">12%</div>
+                <div class="slab-btn active" data-rate="18">18%</div>
+                <div class="slab-btn" data-rate="28">28%</div>
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="result-row">
+                <span style="color: var(--text-secondary);">Base Amount</span>
+                <span id="res-base">₹1,000.00</span>
+            </div>
+            <div class="result-row">
+                <span style="color: var(--text-secondary);">CGST (<span id="cgst-rate">9</span>%)</span>
+                <span id="res-cgst">₹90.00</span>
+            </div>
+            <div class="result-row">
+                <span style="color: var(--text-secondary);">SGST (<span id="sgst-rate">9</span>%)</span>
+                <span id="res-sgst">₹90.00</span>
+            </div>
+            <div class="result-row total">
+                <span>Total Amount</span>
+                <span id="res-total">₹1,180.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentType = 'add';
+    let currentRate = 18;
+    
+    const inpAmount = document.getElementById('inp-amount');
+
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = btn.dataset.type;
+            calculate();
+        });
+    });
+
+    document.querySelectorAll('.slab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.slab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRate = parseFloat(btn.dataset.rate);
+            calculate();
+        });
+    });
+
+    inpAmount.addEventListener('input', calculate);
+
+    function formatRupee(num) {
+        return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function calculate() {
+        const amount = parseFloat(inpAmount.value) || 0;
+        let base = 0, gst = 0, total = 0;
+
+        if (currentType === 'add') {
+            base = amount;
+            gst = base * (currentRate / 100);
+            total = base + gst;
+        } else {
+            total = amount;
+            base = total / (1 + (currentRate / 100));
+            gst = total - base;
+        }
+
+        const halfGst = gst / 2;
+        const halfRate = currentRate / 2;
+
+        document.getElementById('cgst-rate').textContent = halfRate;
+        document.getElementById('sgst-rate').textContent = halfRate;
+
+        document.getElementById('res-base').textContent = formatRupee(base);
+        document.getElementById('res-cgst').textContent = formatRupee(halfGst);
+        document.getElementById('res-sgst').textContent = formatRupee(halfGst);
+        document.getElementById('res-total').textContent = formatRupee(total);
+    }
+
+    calculate();
+</script>
+{{ end }}

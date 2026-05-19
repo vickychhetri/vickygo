@@ -1,0 +1,163 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .hash-workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    @media (max-width: 900px) { .hash-workspace { grid-template-columns: 1fr; } }
+    
+    .panel {
+        background: var(--bg-card);
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .input-area {
+        width: 100%;
+        height: 200px;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        font-family: monospace;
+        resize: vertical;
+        margin-bottom: 20px;
+    }
+    .input-area:focus { outline: none; border-color: var(--accent); }
+    
+    .hash-result {
+        margin-bottom: 15px;
+    }
+    .hash-label {
+        font-weight: bold;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .hash-value {
+        width: 100%;
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        color: var(--accent);
+        padding: 10px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+    }
+    
+    .file-drop {
+        border: 2px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s;
+    }
+    .file-drop:hover, .file-drop.dragover { border-color: var(--accent); }
+    
+    .copy-icon { cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
+    .copy-icon:hover { color: var(--text-primary); }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Hash Generator</h1>
+        <p>Compute MD5, SHA-256, and SHA-512 hashes for text or verify file integrity.</p>
+    </div>
+
+    <div class="hash-workspace">
+        <div class="panel">
+            <h3>Text Input</h3>
+            <textarea id="text-input" class="input-area" placeholder="Type or paste text here..."></textarea>
+            
+            <h3>Or Check File</h3>
+            <div class="file-drop" id="file-drop" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+                <p>Click or drag file here to compute hashes</p>
+                <div id="file-name" style="color: var(--text-secondary); margin-top: 10px;"></div>
+            </div>
+            <input type="file" id="file-input" style="display:none;">
+        </div>
+        
+        <div class="panel">
+            <h3 style="margin-bottom: 20px;">Computed Hashes</h3>
+            
+            <div class="hash-result">
+                <div class="hash-label">MD5 <i class="fas fa-copy copy-icon" onclick="copyHash('hash-md5')"></i></div>
+                <div class="hash-value" id="hash-md5">-</div>
+            </div>
+            
+            <div class="hash-result">
+                <div class="hash-label">SHA-256 <i class="fas fa-copy copy-icon" onclick="copyHash('hash-sha256')"></i></div>
+                <div class="hash-value" id="hash-sha256">-</div>
+            </div>
+            
+            <div class="hash-result">
+                <div class="hash-label">SHA-512 <i class="fas fa-copy copy-icon" onclick="copyHash('hash-sha512')"></i></div>
+                <div class="hash-value" id="hash-sha512">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function computeHashes(type, data) {
+        // Send to Go API
+        const formData = new FormData();
+        formData.append('type', type);
+        formData.append('data', data);
+        
+        try {
+            const res = await fetch('/api/hash', { method: 'POST', body: formData });
+            const result = await res.json();
+            
+            if(result.error) return alert(result.error);
+            
+            document.getElementById('hash-md5').textContent = result.md5 || '-';
+            document.getElementById('hash-sha256').textContent = result.sha256 || '-';
+            document.getElementById('hash-sha512').textContent = result.sha512 || '-';
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    let timeout;
+    document.getElementById('text-input').addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        const text = e.target.value;
+        if(!text) {
+            document.getElementById('hash-md5').textContent = '-';
+            document.getElementById('hash-sha256').textContent = '-';
+            document.getElementById('hash-sha512').textContent = '-';
+            return;
+        }
+        timeout = setTimeout(() => {
+            computeHashes('text', text);
+        }, 300);
+    });
+
+    const fileInput = document.getElementById('file-input');
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        document.getElementById('file-name').textContent = file.name;
+        computeHashes('file', file);
+    });
+
+    function copyHash(id) {
+        const el = document.getElementById(id);
+        if(el.textContent === '-') return;
+        navigator.clipboard.writeText(el.textContent);
+        alert('Copied to clipboard!');
+    }
+</script>
+{{ end }}

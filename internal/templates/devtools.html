@@ -1,0 +1,350 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tools-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .tools-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .tools-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .tools-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .tool-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 30px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tool-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(45, 212, 191, 0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .tool-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 30px -10px rgba(45, 212, 191, 0.2);
+    }
+    
+    .tool-card:hover::before {
+        opacity: 1;
+    }
+    
+    .tool-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(45, 212, 191, 0.1);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        z-index: 1;
+    }
+    
+    .tool-title {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        z-index: 1;
+    }
+    
+    .tool-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        z-index: 1;
+    }
+    
+    .tool-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+        z-index: 1;
+    }
+    
+    .tool-tag {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        color: var(--text-muted);
+    }
+</style>
+
+<div class="tools-dashboard">
+    <div class="tools-header">
+        <h1>Developer Tools</h1>
+        <p>A collection of free, privacy-first developer utilities built with Go and JavaScript. All processing happens locally or via our fast Go backend.</p>
+    </div>
+
+    <div class="tools-grid">
+        <a href="/tools/qr" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-qrcode"></i></div>
+            <h3 class="tool-title">QR Code Generator</h3>
+            <p class="tool-desc">Generate custom QR codes for URLs, WiFi networks, and UPI. Supports custom logos and SVG/PNG downloads.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Go Backend</span>
+                <span class="tool-tag">WiFi</span>
+                <span class="tool-tag">UPI</span>
+            </div>
+        </a>
+
+        <a href="/tools/json" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-brackets-curly"></i></div>
+            <h3 class="tool-title">JSON Formatter & Validator</h3>
+            <p class="tool-desc">Beautify, minify, and validate JSON. Features include JSON diff, CSV export, and Base64 encode/decode with image previews.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Local JS</span>
+                <span class="tool-tag">Base64</span>
+                <span class="tool-tag">Diff</span>
+            </div>
+        </a>
+
+        <a href="/tools/jwt" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-key"></i></div>
+            <h3 class="tool-title">JWT Decoder</h3>
+            <p class="tool-desc">Decode JSON Web Tokens instantly. Verify token expiry and validate signatures locally without sending data to a server.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Local JS</span>
+                <span class="tool-tag">Security</span>
+            </div>
+        </a>
+
+        <a href="/tools/regex" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-search"></i></div>
+            <h3 class="tool-title">Regex Tester</h3>
+            <p class="tool-desc">Test your regular expressions in real-time. Highlights matches and explains capturing groups clearly.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Local JS</span>
+                <span class="tool-tag">Realtime</span>
+            </div>
+        </a>
+
+        <a href="/tools/cron" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-clock"></i></div>
+            <h3 class="tool-title">Cron Expression Generator</h3>
+            <p class="tool-desc">Generate complex cron expressions easily and see their human-readable translations (e.g., "Every 5 minutes").</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Local JS</span>
+                <span class="tool-tag">DevOps</span>
+            </div>
+        </a>
+
+        <a href="/tools/uuid" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-fingerprint"></i></div>
+            <h3 class="tool-title">UUID Generator</h3>
+            <p class="tool-desc">Generate bulk UUIDs (v4 and v7). Fast and cryptographically secure generation using Go.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Go Backend</span>
+                <span class="tool-tag">v4/v7</span>
+            </div>
+        </a>
+
+        <a href="/tools/hash" class="tool-card">
+            <div class="tool-icon"><i class="fas fa-hashtag"></i></div>
+            <h3 class="tool-title">Hash Generator</h3>
+            <p class="tool-desc">Generate MD5, SHA256, and SHA512 hashes. Includes a file hash checker to verify integrity.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Go Backend</span>
+                <span class="tool-tag">SHA256</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="tools-header" style="margin-top: 80px; margin-bottom: 40px;">
+        <h2>India Utilities</h2>
+        <p>High-demand tools specially crafted for Indian users and businesses.</p>
+    </div>
+
+    <div class="tools-grid">
+        <a href="/tools/upi" class="tool-card">
+            <div class="tool-icon" style="color: #4ade80; background: rgba(74, 222, 128, 0.1);"><i class="fas fa-rupee-sign"></i></div>
+            <h3 class="tool-title">UPI QR Generator</h3>
+            <p class="tool-desc">Create custom UPI payment QRs compatible with PhonePe, GPay, and Paytm. Add your business name and amount.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Payments</span>
+                <span class="tool-tag">Business</span>
+            </div>
+        </a>
+
+        <a href="/tools/emi" class="tool-card">
+            <div class="tool-icon" style="color: #60a5fa; background: rgba(96, 165, 250, 0.1);"><i class="fas fa-home"></i></div>
+            <h3 class="tool-title">EMI Calculator</h3>
+            <p class="tool-desc">Calculate your Home or Car loan EMIs instantly. Visualize your repayment schedule and see the impact of prepayments.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Finance</span>
+                <span class="tool-tag">Loans</span>
+            </div>
+        </a>
+
+        <a href="/tools/gst" class="tool-card">
+            <div class="tool-icon" style="color: #f472b6; background: rgba(244, 114, 182, 0.1);"><i class="fas fa-file-invoice-dollar"></i></div>
+            <h3 class="tool-title">GST Calculator</h3>
+            <p class="tool-desc">Easily add or remove GST from your prices. Quick presets for standard 5%, 12%, 18%, and 28% slabs.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Tax</span>
+                <span class="tool-tag">Business</span>
+            </div>
+        </a>
+
+        <a href="/tools/photo-resizer" class="tool-card">
+            <div class="tool-icon" style="color: #c084fc; background: rgba(192, 132, 252, 0.1);"><i class="fas fa-id-card"></i></div>
+            <h3 class="tool-title">Aadhaar Photo Resizer</h3>
+            <p class="tool-desc">Resize and compress your passport photos and signatures to meet strict government exam and form limits (e.g., &lt; 50KB).</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Govt Forms</span>
+                <span class="tool-tag">Exams</span>
+            </div>
+        </a>
+
+        <a href="/tools/pdf-compressor" class="tool-card">
+            <div class="tool-icon" style="color: #f87171; background: rgba(248, 113, 113, 0.1);"><i class="fas fa-file-pdf"></i></div>
+            <h3 class="tool-title">Resume PDF Compressor</h3>
+            <p class="tool-desc">Compress your heavy resume PDFs locally in your browser so they can be uploaded to job portals with file size limits.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Jobs</span>
+                <span class="tool-tag">Local JS</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="tools-header" style="margin-top: 80px; margin-bottom: 40px;">
+        <h2>Frontend Utilities</h2>
+        <p>Essential browser-based tools for web developers and designers.</p>
+    </div>
+
+    <div class="tools-grid">
+        <a href="/tools/palette" class="tool-card">
+            <div class="tool-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"><i class="fas fa-palette"></i></div>
+            <h3 class="tool-title">Color Palette Generator</h3>
+            <p class="tool-desc">Extract beautiful dominant color palettes directly from any image. Instantly copy hex codes.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Design</span>
+                <span class="tool-tag">Local JS</span>
+            </div>
+        </a>
+
+        <a href="/tools/gradient" class="tool-card">
+            <div class="tool-icon" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);"><i class="fas fa-fill-drip"></i></div>
+            <h3 class="tool-title">CSS Gradient Generator</h3>
+            <p class="tool-desc">Create perfect linear gradients with live preview and instantly copy the cross-browser CSS code.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">CSS</span>
+                <span class="tool-tag">Design</span>
+            </div>
+        </a>
+
+        <a href="/tools/shadow" class="tool-card">
+            <div class="tool-icon" style="color: #64748b; background: rgba(100, 116, 139, 0.1);"><i class="fas fa-layer-group"></i></div>
+            <h3 class="tool-title">Box Shadow Generator</h3>
+            <p class="tool-desc">Interactive slider tool to design CSS box shadows. Visual preview with instant CSS copying.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">CSS</span>
+                <span class="tool-tag">Design</span>
+            </div>
+        </a>
+
+        <a href="/tools/sql" class="tool-card">
+            <div class="tool-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fas fa-database"></i></div>
+            <h3 class="tool-title">SQL Formatter</h3>
+            <p class="tool-desc">Beautify messy SQL queries into readable formats or minify them for production code.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Database</span>
+                <span class="tool-tag">Local JS</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="tools-header" style="margin-top: 80px; margin-bottom: 40px;">
+        <h2>Productivity Utilities</h2>
+        <p>Cross-device, real-time tools for teams and individuals who value speed and privacy.</p>
+    </div>
+
+    <div class="tools-grid">
+        <a href="/tools/notes" class="tool-card">
+            <div class="tool-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"><i class="fas fa-sticky-note"></i></div>
+            <h3 class="tool-title">Temporary Notes Share</h3>
+            <p class="tool-desc">Paste text, get a shareable link with auto-expiry (1h / 24h / 7d). No account needed.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Sharing</span>
+                <span class="tool-tag">Ephemeral</span>
+            </div>
+        </a>
+
+        <a href="/tools/secret" class="tool-card">
+            <div class="tool-icon" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);"><i class="fas fa-bomb"></i></div>
+            <h3 class="tool-title">One-Time Secret</h3>
+            <p class="tool-desc">Send encrypted messages, passwords, or API keys that self-destruct after being read once.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Security</span>
+                <span class="tool-tag">Self-Destruct</span>
+            </div>
+        </a>
+
+        <a href="/tools/clipboard" class="tool-card">
+            <div class="tool-icon" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);"><i class="fas fa-clipboard"></i></div>
+            <h3 class="tool-title">Clipboard Sync</h3>
+            <p class="tool-desc">Copy text on your phone, access it on your PC instantly. No login — just a 6-digit PIN.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Cross-Device</span>
+                <span class="tool-tag">Real-time</span>
+            </div>
+        </a>
+
+        <a href="/tools/timezone" class="tool-card">
+            <div class="tool-icon" style="color: #06b6d4; background: rgba(6, 182, 212, 0.1);"><i class="fas fa-globe"></i></div>
+            <h3 class="tool-title">Timezone Converter</h3>
+            <p class="tool-desc">Visualize the same time across multiple cities. Essential for remote teams and global scheduling.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Remote Teams</span>
+                <span class="tool-tag">Scheduling</span>
+            </div>
+        </a>
+    </div>
+</div>
+{{ end }}

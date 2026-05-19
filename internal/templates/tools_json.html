@@ -1,0 +1,326 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    .tool-header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--accent);
+    }
+    .tool-header p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+        overflow-x: auto;
+    }
+    .tab {
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .tab.active {
+        background: rgba(45, 212, 191, 0.1);
+        color: var(--accent);
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        height: 60vh;
+    }
+    @media (max-width: 900px) {
+        .workspace { grid-template-columns: 1fr; height: auto; }
+    }
+    .editor-pane {
+        display: flex;
+        flex-direction: column;
+    }
+    .toolbar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        background: var(--bg-card);
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+    .btn {
+        padding: 8px 16px;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    .btn-primary {
+        background: var(--accent);
+        color: #000;
+        border: none;
+    }
+    .btn-primary:hover {
+        background: #2dd4bf;
+        color: #000;
+    }
+    textarea {
+        flex-grow: 1;
+        width: 100%;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        resize: vertical;
+        min-height: 300px;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    .error-msg {
+        color: #f87171;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        display: none;
+    }
+    .success-msg {
+        color: #4ade80;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        display: none;
+    }
+    
+    /* Base64 Preview */
+    .preview-box {
+        margin-top: 20px;
+        padding: 20px;
+        background: var(--bg-card);
+        border: 1px dashed var(--border-color);
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+    }
+    .preview-box img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>JSON & Data Tools</h1>
+        <p>Format, validate, diff JSON, convert to CSV, and encode/decode Base64 locally in your browser.</p>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-target="json-tab">JSON Formatter</div>
+        <div class="tab" data-target="diff-tab">JSON Diff</div>
+        <div class="tab" data-target="csv-tab">JSON to CSV</div>
+        <div class="tab" data-target="base64-tab">Base64 Encode/Decode</div>
+    </div>
+
+    <!-- JSON Formatter Tab -->
+    <div id="json-tab" class="tab-content active">
+        <div class="toolbar">
+            <button class="btn btn-primary" id="btn-format">Beautify</button>
+            <button class="btn" id="btn-minify">Minify</button>
+            <button class="btn" id="btn-clear">Clear</button>
+        </div>
+        <div class="workspace" style="grid-template-columns: 1fr;">
+            <div class="editor-pane">
+                <textarea id="json-input" placeholder="Paste your JSON here..."></textarea>
+                <div id="json-error" class="error-msg"></div>
+                <div id="json-success" class="success-msg">Valid JSON</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Diff Tab -->
+    <div id="diff-tab" class="tab-content">
+        <div class="toolbar">
+            <button class="btn btn-primary" id="btn-compare">Compare</button>
+        </div>
+        <div class="workspace">
+            <div class="editor-pane">
+                <textarea id="diff-left" placeholder="Original JSON..."></textarea>
+            </div>
+            <div class="editor-pane">
+                <textarea id="diff-right" placeholder="Modified JSON..."></textarea>
+            </div>
+        </div>
+        <div id="diff-result" style="margin-top:20px; background:var(--bg-card); padding:20px; border-radius:8px;">
+            Results will appear here... (Simple length/key comparison demo)
+        </div>
+    </div>
+
+    <!-- JSON to CSV Tab -->
+    <div id="csv-tab" class="tab-content">
+        <div class="toolbar">
+            <button class="btn btn-primary" id="btn-tocsv">Convert to CSV</button>
+        </div>
+        <div class="workspace">
+            <div class="editor-pane">
+                <textarea id="csv-json-input" placeholder='[{"name": "John", "age": 30}]'></textarea>
+            </div>
+            <div class="editor-pane">
+                <textarea id="csv-output" placeholder="CSV output..." readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Base64 Tab -->
+    <div id="base64-tab" class="tab-content">
+        <div class="toolbar">
+            <button class="btn btn-primary" id="btn-b64-encode">Encode to Base64</button>
+            <button class="btn" id="btn-b64-decode">Decode from Base64</button>
+            <input type="file" id="file-input" style="display:none;">
+            <button class="btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-file-upload"></i> Encode File</button>
+        </div>
+        <div class="workspace" style="grid-template-columns: 1fr;">
+            <div class="editor-pane">
+                <textarea id="b64-input" placeholder="Enter text or Base64..."></textarea>
+                <div id="b64-preview" class="preview-box">
+                    <img id="b64-img" src="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+        });
+    });
+
+    // JSON Formatter
+    const jsonInput = document.getElementById('json-input');
+    const jsonError = document.getElementById('json-error');
+    const jsonSuccess = document.getElementById('json-success');
+
+    function processJSON(minify = false) {
+        try {
+            const parsed = JSON.parse(jsonInput.value);
+            jsonInput.value = minify ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 4);
+            jsonError.style.display = 'none';
+            jsonSuccess.style.display = 'block';
+            setTimeout(() => jsonSuccess.style.display = 'none', 2000);
+        } catch(e) {
+            jsonError.textContent = "Invalid JSON: " + e.message;
+            jsonError.style.display = 'block';
+            jsonSuccess.style.display = 'none';
+        }
+    }
+
+    document.getElementById('btn-format').addEventListener('click', () => processJSON(false));
+    document.getElementById('btn-minify').addEventListener('click', () => processJSON(true));
+    document.getElementById('btn-clear').addEventListener('click', () => { jsonInput.value = ''; jsonError.style.display='none';});
+
+    // JSON to CSV
+    document.getElementById('btn-tocsv').addEventListener('click', () => {
+        try {
+            const data = JSON.parse(document.getElementById('csv-json-input').value);
+            if (!Array.isArray(data)) throw new Error("JSON must be an array of objects");
+            if (data.length === 0) return;
+            
+            const keys = Object.keys(data[0]);
+            const csv = [
+                keys.join(','),
+                ...data.map(row => keys.map(k => JSON.stringify(row[k] || "")).join(','))
+            ].join('\n');
+            
+            document.getElementById('csv-output').value = csv;
+        } catch(e) {
+            alert(e.message);
+        }
+    });
+
+    // JSON Diff
+    document.getElementById('btn-compare').addEventListener('click', () => {
+        try {
+            const left = JSON.parse(document.getElementById('diff-left').value);
+            const right = JSON.parse(document.getElementById('diff-right').value);
+            
+            const res = document.getElementById('diff-result');
+            if (JSON.stringify(left) === JSON.stringify(right)) {
+                res.innerHTML = "<span style='color:#4ade80;'>JSON objects are identical.</span>";
+            } else {
+                res.innerHTML = "<span style='color:#f87171;'>JSON objects differ.</span> (Visual diff requires external library, simplified demo)";
+            }
+        } catch(e) {
+            alert("Invalid JSON in one of the fields");
+        }
+    });
+
+    // Base64
+    const b64Input = document.getElementById('b64-input');
+    const b64Preview = document.getElementById('b64-preview');
+    const b64Img = document.getElementById('b64-img');
+
+    document.getElementById('btn-b64-encode').addEventListener('click', () => {
+        try { b64Input.value = btoa(b64Input.value); } catch(e) { alert("Encoding failed"); }
+    });
+    
+    document.getElementById('btn-b64-decode').addEventListener('click', () => {
+        try { 
+            const decoded = atob(b64Input.value);
+            b64Input.value = decoded; 
+        } catch(e) { 
+            // Might be an image
+            if (b64Input.value.startsWith('data:image')) {
+                b64Img.src = b64Input.value;
+                b64Preview.style.display = 'block';
+            } else {
+                alert("Decoding failed or not a valid string"); 
+            }
+        }
+    });
+
+    // File Encode
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            b64Input.value = e.target.result;
+            if (file.type.startsWith('image/')) {
+                b64Img.src = e.target.result;
+                b64Preview.style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+{{ end }}

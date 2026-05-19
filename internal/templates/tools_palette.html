@@ -1,0 +1,137 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.4.0/color-thief.umd.js"></script>
+<style>
+    .tool-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 30px;}
+    
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color 0.3s; }
+    .drop-zone:hover { border-color: var(--accent); }
+    
+    .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; display: none;}
+    @media (max-width: 800px) { .workspace { grid-template-columns: 1fr; } }
+    
+    .image-preview { width: 100%; height: 300px; object-fit: contain; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color); }
+    
+    .palette-grid { display: flex; flex-direction: column; gap: 15px; }
+    .color-row { display: flex; align-items: center; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+    .color-row:hover { transform: translateX(5px); }
+    .color-swatch { width: 80px; height: 60px; flex-shrink: 0; }
+    .color-info { padding: 0 20px; flex-grow: 1; display: flex; justify-content: space-between; align-items: center;}
+    .color-hex { font-family: var(--font-mono); font-weight: bold; font-size: 1.1rem; color: var(--text-primary);}
+    .color-rgb { font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-secondary);}
+    
+    .toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-main); padding: 12px 24px; border-radius: 8px; font-weight: bold; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000;}
+    .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Color Palette Generator</h1>
+        <p>Extract beautiful dominant color palettes directly from any image.</p>
+    </div>
+
+    <div class="panel" id="upload-panel">
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-image" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3>Click or drag image here</h3>
+            <p style="color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">Processed locally in your browser.</p>
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display:none;">
+    </div>
+
+    <div class="workspace" id="workspace">
+        <div>
+            <h3 style="margin-bottom: 15px;">Uploaded Image</h3>
+            <img id="preview-img" class="image-preview" src="">
+            <button onclick="document.getElementById('file-input').click()" style="margin-top: 15px; background:transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 16px; border-radius: 6px; cursor: pointer;">Change Image</button>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 15px;">Extracted Palette</h3>
+            <div class="palette-grid" id="palette-grid">
+                <!-- Colors will be injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const previewImg = document.getElementById('preview-img');
+    const workspace = document.getElementById('workspace');
+    const paletteGrid = document.getElementById('palette-grid');
+    const colorThief = new ColorThief();
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.onload = () => {
+                workspace.style.display = 'grid';
+                extractColors();
+            };
+            previewImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function rgbToHex(r, g, b) {
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+    }
+
+    function extractColors() {
+        if (!previewImg.complete) return;
+        paletteGrid.innerHTML = '';
+        
+        try {
+            // Get dominant color
+            const dominant = colorThief.getColor(previewImg);
+            // Get palette (5 colors)
+            const palette = colorThief.getPalette(previewImg, 5);
+            
+            // Combine and deduplicate just in case
+            const allColors = [dominant, ...palette];
+            
+            allColors.forEach((rgb, index) => {
+                const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+                const rgbStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                
+                const row = document.createElement('div');
+                row.className = 'color-row';
+                if(index === 0) row.style.border = '2px solid var(--accent)'; // Highlight dominant
+                
+                row.innerHTML = `
+                    <div class="color-swatch" style="background-color: ${hex}"></div>
+                    <div class="color-info">
+                        <span class="color-hex">${hex} ${index===0?'<span style="font-size:0.7rem; color:var(--accent); margin-left:10px;">DOMINANT</span>':''}</span>
+                        <span class="color-rgb">${rgbStr}</span>
+                    </div>
+                `;
+                
+                row.onclick = () => {
+                    navigator.clipboard.writeText(hex);
+                    showToast(`Copied ${hex}`);
+                };
+                
+                paletteGrid.appendChild(row);
+            });
+        } catch (e) {
+            console.error("ColorThief failed (usually CORS issue with external images, but fine for local file uploads)", e);
+        }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+</script>
+{{ end }}

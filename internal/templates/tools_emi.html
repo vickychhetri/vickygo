@@ -1,0 +1,171 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .tool-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    @media (max-width: 900px) { .tool-container { grid-template-columns: 1fr; } }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--text-primary); font-weight: 500; }
+    
+    .input-wrapper { position: relative; }
+    .input-wrapper input { width: 100%; padding: 12px 12px 12px 40px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 1.1rem; outline: none; }
+    .input-wrapper input:focus { border-color: var(--accent); }
+    .input-prefix { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+    .input-suffix { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+    
+    .slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--bg-main); outline: none; margin-top: 15px; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+    
+    .results-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px; }
+    .result-card { background: var(--bg-main); padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent); }
+    .result-label { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 5px; }
+    .result-value { font-size: 1.8rem; font-weight: bold; color: var(--text-primary); }
+    
+    .chart-container { height: 300px; width: 100%; }
+</style>
+
+<div class="tool-container">
+    <div>
+        <div class="tool-header">
+            <h1>EMI Calculator</h1>
+            <p>Calculate EMIs for Home, Car, or Personal Loans in India.</p>
+        </div>
+
+        <div class="panel">
+            <div class="form-group">
+                <label>Loan Amount <span id="val-amount">₹50,00,000</span></label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">₹</span>
+                    <input type="number" id="inp-amount" value="5000000" style="padding-left: 35px;">
+                </div>
+                <input type="range" class="slider" id="slide-amount" min="100000" max="20000000" step="100000" value="5000000">
+            </div>
+
+            <div class="form-group">
+                <label>Interest Rate (p.a.) <span id="val-rate">8.5%</span></label>
+                <div class="input-wrapper">
+                    <input type="number" id="inp-rate" value="8.5" step="0.1" style="padding-left: 15px;">
+                    <span class="input-suffix">%</span>
+                </div>
+                <input type="range" class="slider" id="slide-rate" min="5" max="20" step="0.1" value="8.5">
+            </div>
+
+            <div class="form-group">
+                <label>Loan Tenure <span id="val-tenure">20 Years</span></label>
+                <div class="input-wrapper">
+                    <input type="number" id="inp-tenure" value="20" style="padding-left: 15px;">
+                    <span class="input-suffix">Yr</span>
+                </div>
+                <input type="range" class="slider" id="slide-tenure" min="1" max="30" step="1" value="20">
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="results-grid">
+            <div class="result-card">
+                <div class="result-label">Monthly EMI</div>
+                <div class="result-value" id="res-emi">₹0</div>
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <div class="result-card" style="flex:1; border-color: #60a5fa;">
+                    <div class="result-label">Principal Amount</div>
+                    <div class="result-value" id="res-principal" style="font-size: 1.3rem;">₹0</div>
+                </div>
+                <div class="result-card" style="flex:1; border-color: #f87171;">
+                    <div class="result-label">Total Interest</div>
+                    <div class="result-value" id="res-interest" style="font-size: 1.3rem;">₹0</div>
+                </div>
+            </div>
+            <div class="result-card" style="border-color: #4ade80;">
+                <div class="result-label">Total Amount Payable</div>
+                <div class="result-value" id="res-total" style="font-size: 1.3rem;">₹0</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="emiChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const P_inp = document.getElementById('inp-amount'), P_slide = document.getElementById('slide-amount'), P_val = document.getElementById('val-amount');
+    const R_inp = document.getElementById('inp-rate'), R_slide = document.getElementById('slide-rate'), R_val = document.getElementById('val-rate');
+    const T_inp = document.getElementById('inp-tenure'), T_slide = document.getElementById('slide-tenure'), T_val = document.getElementById('val-tenure');
+    
+    let chart;
+
+    function formatRupee(num) {
+        return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
+    }
+
+    function sync(inp, slide, val, prefix, suffix) {
+        inp.addEventListener('input', () => { slide.value = inp.value; update(); });
+        slide.addEventListener('input', () => { inp.value = slide.value; update(); });
+    }
+
+    sync(P_inp, P_slide);
+    sync(R_inp, R_slide);
+    sync(T_inp, T_slide);
+
+    function update() {
+        const P = parseFloat(P_inp.value) || 0;
+        const r = (parseFloat(R_inp.value) || 0) / 12 / 100;
+        const n = (parseFloat(T_inp.value) || 0) * 12;
+
+        P_val.textContent = formatRupee(P);
+        R_val.textContent = R_inp.value + '%';
+        T_val.textContent = T_inp.value + ' Years';
+
+        let emi = 0, totalInterest = 0, totalPayment = 0;
+
+        if (P > 0 && r > 0 && n > 0) {
+            emi = P * r * (Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+            totalPayment = emi * n;
+            totalInterest = totalPayment - P;
+        } else if (P > 0 && n > 0) {
+            emi = P / n;
+            totalPayment = P;
+            totalInterest = 0;
+        }
+
+        document.getElementById('res-emi').textContent = formatRupee(emi);
+        document.getElementById('res-principal').textContent = formatRupee(P);
+        document.getElementById('res-interest').textContent = formatRupee(totalInterest);
+        document.getElementById('res-total').textContent = formatRupee(totalPayment);
+
+        renderChart(P, totalInterest);
+    }
+
+    function renderChart(principal, interest) {
+        const ctx = document.getElementById('emiChart').getContext('2d');
+        if (chart) chart.destroy();
+        
+        chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Principal Amount', 'Total Interest'],
+                datasets: [{
+                    data: [principal, interest],
+                    backgroundColor: ['#60a5fa', '#f87171'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#475569' } }
+                }
+            }
+        });
+    }
+
+    update();
+</script>
+{{ end }}

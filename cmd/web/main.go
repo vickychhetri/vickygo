@@ -6,12 +6,18 @@ import (
 	"net/http"
 	"time"
 	"vickygo/internal/handlers"
+	"vickygo/internal/store"
 )
 
 type PageData struct {
 	Title string
 	Year  int
 	Data  any
+}
+
+func init() {
+	// Start the in-memory store garbage collector
+	store.Global.StartGC()
 }
 
 func render(w http.ResponseWriter, tmpl string, title string, data any) {
@@ -66,6 +72,10 @@ func main() {
 		render(w, "gocheatsheet.html", "Go Cheat Sheet", nil)
 	})
 
+	http.HandleFunc("/go-tips/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "gotips.html", "Useful Go Tips", nil)
+	})
+
 	http.HandleFunc("/git-cheat-sheet/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "gitcheatsheet.html", "Git Cheat Sheet", nil)
 	})
@@ -73,6 +83,84 @@ func main() {
 	http.HandleFunc("/life-tradeoff/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "age.html", "Life Trade Off", nil)
 	})
+
+	http.HandleFunc("/tools/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "devtools.html", "Developer Tools", nil)
+	})
+	http.HandleFunc("/tools/qr", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_qr.html", "QR Code Generator", nil)
+	})
+	http.HandleFunc("/tools/json", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_json.html", "JSON Formatter", nil)
+	})
+	http.HandleFunc("/tools/jwt", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_jwt.html", "JWT Decoder", nil)
+	})
+	http.HandleFunc("/tools/regex", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_regex.html", "Regex Tester", nil)
+	})
+	http.HandleFunc("/tools/cron", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_cron.html", "Cron Generator", nil)
+	})
+	http.HandleFunc("/tools/uuid", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_uuid.html", "UUID Generator", nil)
+	})
+	http.HandleFunc("/tools/hash", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_hash.html", "Hash Generator", nil)
+	})
+
+	// India Utilities
+	http.HandleFunc("/tools/upi", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_upi.html", "UPI QR Generator", nil)
+	})
+	http.HandleFunc("/tools/emi", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_emi.html", "EMI Calculator", nil)
+	})
+	http.HandleFunc("/tools/gst", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_gst.html", "GST Calculator", nil)
+	})
+	http.HandleFunc("/tools/photo-resizer", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_photo.html", "Aadhaar Photo Resizer", nil)
+	})
+	http.HandleFunc("/tools/pdf-compressor", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_pdf.html", "Resume PDF Compressor", nil)
+	})
+
+	// Frontend Utilities
+	http.HandleFunc("/tools/palette", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_palette.html", "Color Palette Generator", nil)
+	})
+	http.HandleFunc("/tools/gradient", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_gradient.html", "CSS Gradient Generator", nil)
+	})
+	http.HandleFunc("/tools/shadow", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_shadow.html", "Box Shadow Generator", nil)
+	})
+	http.HandleFunc("/tools/sql", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_sql.html", "SQL Formatter", nil)
+	})
+
+	// Productivity Utilities
+	http.HandleFunc("/tools/notes", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_notes.html", "Temporary Notes", nil)
+	})
+	http.HandleFunc("/tools/secret", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_secret.html", "One-Time Secret", nil)
+	})
+	http.HandleFunc("/tools/clipboard", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_clipboard.html", "Clipboard Sync", nil)
+	})
+	http.HandleFunc("/tools/timezone", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_timezone.html", "Timezone Converter", nil)
+	})
+
+	// API Endpoints
+	http.HandleFunc("/api/qr", handlers.QRApiHandler)
+	http.HandleFunc("/api/uuid", handlers.UUIDApiHandler)
+	http.HandleFunc("/api/hash", handlers.HashApiHandler)
+	http.HandleFunc("/api/notes", handlers.NotesApiHandler)
+	http.HandleFunc("/api/secrets", handlers.SecretApiHandler)
+	http.HandleFunc("/api/clipboard", handlers.ClipboardApiHandler)
 
 	http.HandleFunc("/distributed-universe/", func(w http.ResponseWriter, r *http.Request) {
 		renderUniverse(w, "distributed-universe.html", "Distributed System Universe", nil)

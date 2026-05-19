@@ -1,0 +1,110 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+    .pin-input { display: flex; gap: 10px; }
+    .pin-input input { flex: 1; padding: 15px; font-size: 1.5rem; text-align: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); letter-spacing: 0.3rem; font-family: var(--font-mono); outline: none; }
+    .pin-input input:focus { border-color: var(--accent); }
+    .btn { padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; width: 100%; margin-top: 15px; padding: 14px; font-size: 1rem; }
+    .btn-sm { padding: 8px 16px; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    textarea.sync-text { width: 100%; min-height: 200px; background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; font-size: 1rem; font-family: var(--font-sans); resize: vertical; outline: none; }
+    textarea.sync-text:focus { border-color: var(--accent); }
+    .sync-controls { display: flex; gap: 10px; margin-top: 10px; align-items: center; justify-content: space-between; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Clipboard Sync</h1>
+        <p>Copy on your phone, access on your PC. No login, no app — just a 6-digit PIN.</p>
+    </div>
+
+    <div class="panel" id="pin-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Generate or Enter a PIN</h3>
+            <button class="btn-sm" onclick="generatePin()"><i class="fas fa-random"></i> Generate</button>
+        </div>
+        <div class="pin-input">
+            <input type="text" id="pin-input" maxlength="6" placeholder="Enter PIN" inputmode="numeric">
+        </div>
+        <button class="btn btn-primary" onclick="joinSession()"><i class="fas fa-sync-alt"></i> Start Sync Session</button>
+    </div>
+
+    <div class="panel" id="sync-panel" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div>
+                <span class="status-dot"></span>
+                <strong>Session Active</strong>
+                <span style="font-family: var(--font-mono); color: var(--text-secondary); margin-left: 10px;" id="active-pin"></span>
+            </div>
+            <button class="btn-sm" onclick="leaveSession()"><i class="fas fa-times"></i> Leave</button>
+        </div>
+        <textarea class="sync-text" id="sync-text" placeholder="Type or paste here. Content syncs automatically..."></textarea>
+        <div class="sync-controls">
+            <span id="last-synced" style="color: var(--text-muted); font-size: 0.85rem;"></span>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-sm" onclick="pullContent()"><i class="fas fa-arrow-down"></i> Pull</button>
+                <button class="btn-sm" onclick="pushContent()"><i class="fas fa-arrow-up"></i> Push</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activePin = null, pollInterval = null;
+
+    function generatePin() {
+        document.getElementById('pin-input').value = Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    function joinSession() {
+        const pin = document.getElementById('pin-input').value.trim();
+        if (!pin || pin.length < 4) { alert('Please enter a valid PIN.'); return; }
+        activePin = pin;
+        document.getElementById('active-pin').textContent = '(' + pin + ')';
+        document.getElementById('pin-panel').style.display = 'none';
+        document.getElementById('sync-panel').style.display = 'block';
+        pullContent();
+        pollInterval = setInterval(pullContent, 3000);
+        let debounce;
+        document.getElementById('sync-text').addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(pushContent, 1500);
+        });
+    }
+
+    function leaveSession() {
+        clearInterval(pollInterval);
+        activePin = null;
+        document.getElementById('pin-panel').style.display = 'block';
+        document.getElementById('sync-panel').style.display = 'none';
+        document.getElementById('sync-text').value = '';
+    }
+
+    async function pullContent() {
+        if (!activePin) return;
+        const res = await fetch('/api/clipboard?pin=' + activePin);
+        const data = await res.json();
+        if (data.content !== undefined) {
+            const ta = document.getElementById('sync-text');
+            if (ta.value !== data.content) ta.value = data.content;
+        }
+        document.getElementById('last-synced').textContent = 'Synced: ' + new Date().toLocaleTimeString();
+    }
+
+    async function pushContent() {
+        if (!activePin) return;
+        await fetch('/api/clipboard', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ pin: activePin, content: document.getElementById('sync-text').value })
+        });
+        document.getElementById('last-synced').textContent = 'Pushed: ' + new Date().toLocaleTimeString();
+    }
+</script>
+{{ end }}

@@ -1,0 +1,127 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; display: grid; grid-template-columns: 1fr 400px; gap: 40px; }
+    @media (max-width: 900px) { .tool-container { grid-template-columns: 1fr; } }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500; }
+    .form-group input, .form-group select { width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; }
+    .form-group input:focus { border-color: var(--accent); }
+    
+    .btn { width: 100%; padding: 12px; background: var(--accent); color: #000; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; }
+    .btn:hover { opacity: 0.9; }
+    
+    .preview-panel { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .qr-stand { 
+        background: #fff; border-radius: 16px; padding: 20px; width: 300px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative;
+        text-align: center; color: #000;
+    }
+    .qr-stand-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px dashed #ccc; padding-bottom: 10px;}
+    .qr-preview { width: 260px; height: 260px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 8px; overflow: hidden; }
+    .qr-preview img { max-width: 100%; max-height: 100%; }
+    .qr-footer { font-size: 0.9rem; color: #555; }
+    .app-logos { display: flex; justify-content: center; gap: 10px; margin-top: 15px; font-size: 1.5rem; color: #666; }
+</style>
+
+<div class="tool-container">
+    <div>
+        <div class="tool-header">
+            <h1>India UPI QR Generator</h1>
+            <p>Generate a professional business QR code compatible with PhonePe, GPay, Paytm, and BHIM.</p>
+        </div>
+
+        <div class="panel">
+            <div class="form-group">
+                <label>UPI ID (VPA) <span style="color:red">*</span></label>
+                <input type="text" id="upi-id" placeholder="e.g. 9876543210@ybl">
+            </div>
+            <div class="form-group">
+                <label>Business / Payee Name <span style="color:red">*</span></label>
+                <input type="text" id="upi-name" placeholder="e.g. Vicky's Cafe">
+            </div>
+            <div class="form-group">
+                <label>Fixed Amount (Optional)</label>
+                <input type="number" id="upi-amt" placeholder="Leave empty for customer to enter amount">
+            </div>
+            <button class="btn" id="generate-btn">Generate UPI QR</button>
+        </div>
+    </div>
+
+    <div class="preview-panel panel">
+        <h3 style="margin-bottom: 20px;">QR Stand Preview</h3>
+        <div class="qr-stand" id="printable-stand">
+            <div class="qr-stand-header" id="stand-name">Your Business Name</div>
+            <div class="qr-preview" id="qr-container">
+                <img id="qr-image" src="" style="display:none;" alt="UPI QR">
+                <span id="qr-placeholder" style="color: #666;">QR will appear here</span>
+            </div>
+            <div class="qr-footer">Scan & Pay Using Any App</div>
+            <div class="app-logos">
+                <i class="fab fa-google-pay" title="GPay"></i>
+                <i class="fab fa-amazon-pay" title="Amazon Pay"></i>
+                <i class="fas fa-wallet" title="Paytm/PhonePe"></i>
+            </div>
+        </div>
+        <button class="btn" id="print-btn" style="margin-top: 20px; background: transparent; border: 1px solid var(--accent); color: var(--accent);"><i class="fas fa-print"></i> Print QR Stand</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('generate-btn').addEventListener('click', async () => {
+        const id = document.getElementById('upi-id').value;
+        const name = document.getElementById('upi-name').value;
+        const amt = document.getElementById('upi-amt').value;
+        
+        if(!id || !name) return alert("UPI ID and Name are required");
+
+        let data = `upi://pay?pa=${id}&pn=${encodeURIComponent(name)}`;
+        if(amt) data += `&am=${amt}`;
+
+        document.getElementById('stand-name').textContent = name;
+
+        try {
+            const res = await fetch('/api/qr', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: data })
+            });
+            const result = await res.json();
+            if(result.error) return alert(result.error);
+            
+            const img = document.getElementById('qr-image');
+            img.src = "data:image/png;base64," + result.base64;
+            img.style.display = "block";
+            document.getElementById('qr-placeholder').style.display = "none";
+            
+        } catch(e) {
+            alert("Error generating QR code");
+        }
+    });
+
+    document.getElementById('print-btn').addEventListener('click', () => {
+        const printContent = document.getElementById('printable-stand').outerHTML;
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(`
+            <html><head><title>Print UPI QR</title>
+            <style>
+                body { display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; background: #f0f0f0;}
+                .qr-stand { background: #fff; border-radius: 16px; padding: 30px; width: 400px; text-align: center; border: 1px solid #ccc;}
+                .qr-stand-header { font-weight: bold; font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px dashed #ccc; padding-bottom: 15px;}
+                .qr-preview { width: 340px; height: 340px; margin: 0 auto 20px auto; }
+                .qr-preview img { width: 100%; height: 100%; }
+                .qr-footer { font-size: 1.2rem; color: #555; font-weight: bold;}
+            </style>
+            </head><body>
+            ${printContent}
+            </body></html>
+        `);
+        printWindow.document.close();
+        setTimeout(() => { printWindow.print(); }, 500);
+    });
+</script>
+{{ end }}

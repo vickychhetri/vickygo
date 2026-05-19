@@ -1,0 +1,174 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .regex-input-group {
+        display: flex;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .regex-slash {
+        padding: 15px;
+        background: var(--bg-main);
+        color: var(--text-secondary);
+        font-weight: bold;
+        font-size: 1.2rem;
+        border-right: 1px solid var(--border-color);
+        border-left: 1px solid var(--border-color);
+    }
+    .regex-input-group input {
+        flex-grow: 1;
+        background: transparent;
+        border: none;
+        padding: 15px;
+        color: var(--accent);
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        outline: none;
+    }
+    .regex-flags {
+        width: 100px;
+        border-left: 0;
+    }
+    
+    .test-string {
+        width: 100%;
+        height: 200px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        resize: vertical;
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+    .test-string:focus { outline: none; border-color: var(--accent); }
+    
+    .results {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 100px;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+    }
+    .match {
+        background: rgba(45, 212, 191, 0.3);
+        border-bottom: 2px solid var(--accent);
+        border-radius: 2px;
+    }
+    .match-details {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+    .match-item {
+        background: var(--bg-main);
+        padding: 10px;
+        margin-bottom: 5px;
+        border-left: 3px solid var(--accent);
+        border-radius: 0 4px 4px 0;
+    }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Regex Tester</h1>
+        <p>Real-time regular expression testing for Go, JavaScript, and more.</p>
+    </div>
+
+    <div class="regex-input-group">
+        <div class="regex-slash">/</div>
+        <input type="text" id="regex-pattern" placeholder="([a-z]+)@([a-z]+)\.([a-z]+)" value="([a-z]+)@([a-z]+)\.([a-z]+)">
+        <div class="regex-slash">/</div>
+        <input type="text" class="regex-flags" id="regex-flags" placeholder="gm" value="g">
+    </div>
+
+    <h3 style="margin-bottom: 10px;">Test String</h3>
+    <textarea id="test-string" class="test-string">Hello contact@vickychhetri.com, please email support@vickychhetri.com for help.</textarea>
+
+    <h3 style="margin-bottom: 10px;">Match Results</h3>
+    <div id="results" class="results"></div>
+    <div id="match-details" class="match-details"></div>
+</div>
+
+<script>
+    const patternInput = document.getElementById('regex-pattern');
+    const flagsInput = document.getElementById('regex-flags');
+    const testString = document.getElementById('test-string');
+    const results = document.getElementById('results');
+    const matchDetails = document.getElementById('match-details');
+
+    function updateRegex() {
+        const pattern = patternInput.value;
+        const flags = flagsInput.value;
+        const text = testString.value;
+
+        if (!pattern) {
+            results.textContent = text;
+            matchDetails.innerHTML = '';
+            return;
+        }
+
+        try {
+            const regex = new RegExp(pattern, flags);
+            let match;
+            let html = text;
+            let detailsHtml = '';
+            
+            // Highlight all matches
+            if (flags.includes('g')) {
+                html = text.replace(regex, `<span class="match">$&</span>`);
+            } else {
+                html = text.replace(regex, `<span class="match">$&</span>`);
+            }
+            results.innerHTML = html;
+
+            // Extract details
+            const execRegex = new RegExp(pattern, flags.includes('g') ? flags : flags + 'g');
+            let matchCount = 0;
+            while ((match = execRegex.exec(text)) !== null) {
+                matchCount++;
+                let groups = '';
+                for(let i=1; i<match.length; i++) {
+                    groups += `<div>Group ${i}: <span style="color:var(--accent)">${match[i]}</span></div>`;
+                }
+                detailsHtml += `
+                    <div class="match-item">
+                        <strong>Match ${matchCount}:</strong> ${match[0]}
+                        <div style="margin-top:5px; padding-left:10px; color:var(--text-secondary)">
+                            ${groups}
+                        </div>
+                    </div>
+                `;
+                if (!execRegex.global) break; // Avoid infinite loop if no 'g'
+            }
+            
+            if(matchCount === 0) {
+                matchDetails.innerHTML = '<div style="color: #f87171;">No matches found.</div>';
+            } else {
+                matchDetails.innerHTML = detailsHtml;
+            }
+
+        } catch (e) {
+            results.innerHTML = `<span style="color: #f87171;">Invalid Regex: ${e.message}</span>`;
+            matchDetails.innerHTML = '';
+        }
+    }
+
+    patternInput.addEventListener('input', updateRegex);
+    flagsInput.addEventListener('input', updateRegex);
+    testString.addEventListener('input', updateRegex);
+    
+    // Initial run
+    updateRegex();
+</script>
+{{ end }}

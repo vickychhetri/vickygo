@@ -1,0 +1,158 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+    .add-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .add-bar select { flex: 1; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .master-time { display: flex; gap: 15px; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
+    .master-time input[type="datetime-local"] { flex:1; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 1rem; }
+    .master-time input:focus { border-color: var(--accent); }
+    .tz-grid { display: flex; flex-direction: column; gap: 12px; }
+    .tz-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .tz-card.local { border-color: var(--accent); }
+    .tz-info { display: flex; flex-direction: column; gap: 4px; }
+    .tz-name { font-weight: 600; font-size: 1rem; color: var(--text-primary); }
+    .tz-zone { font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); }
+    .tz-time { font-size: 1.6rem; font-weight: bold; font-family: var(--font-mono); color: var(--accent); }
+    .tz-date { font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+    .tz-remove { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 5px; }
+    .tz-remove:hover { color: #ef4444; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>Timezone Converter</h1>
+        <p>Instantly see the same moment across multiple timezones. Perfect for remote teams.</p>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-bottom: 15px;">Set Reference Time</h3>
+        <div class="master-time">
+            <input type="datetime-local" id="master-time">
+            <button class="btn btn-primary" onclick="setNow()"><i class="fas fa-clock"></i> Use Now</button>
+        </div>
+
+        <h3 style="margin-bottom: 15px;">Add Timezone</h3>
+        <div class="add-bar">
+            <select id="tz-select"></select>
+            <button class="btn btn-primary" onclick="addTimezone()"><i class="fas fa-plus"></i> Add</button>
+        </div>
+
+        <div class="tz-grid" id="tz-grid"></div>
+    </div>
+</div>
+
+<script>
+    // Common timezones with friendly names
+    const TZ_LIST = [
+        { name: "Kolkata (IST)", zone: "Asia/Kolkata" },
+        { name: "Mumbai (IST)", zone: "Asia/Kolkata" },
+        { name: "London (GMT/BST)", zone: "Europe/London" },
+        { name: "New York (EST/EDT)", zone: "America/New_York" },
+        { name: "Los Angeles (PST/PDT)", zone: "America/Los_Angeles" },
+        { name: "Chicago (CST/CDT)", zone: "America/Chicago" },
+        { name: "Dubai (GST)", zone: "Asia/Dubai" },
+        { name: "Singapore (SGT)", zone: "Asia/Singapore" },
+        { name: "Tokyo (JST)", zone: "Asia/Tokyo" },
+        { name: "Sydney (AEST/AEDT)", zone: "Australia/Sydney" },
+        { name: "Berlin (CET/CEST)", zone: "Europe/Berlin" },
+        { name: "Paris (CET/CEST)", zone: "Europe/Paris" },
+        { name: "Toronto (EST/EDT)", zone: "America/Toronto" },
+        { name: "São Paulo (BRT)", zone: "America/Sao_Paulo" },
+        { name: "Beijing (CST)", zone: "Asia/Shanghai" },
+        { name: "Jakarta (WIB)", zone: "Asia/Jakarta" },
+        { name: "Moscow (MSK)", zone: "Europe/Moscow" },
+        { name: "Cairo (EET)", zone: "Africa/Cairo" },
+        { name: "UTC", zone: "UTC" },
+    ];
+
+    let activeZones = [];
+
+    function populateSelect() {
+        const sel = document.getElementById('tz-select');
+        TZ_LIST.forEach(tz => {
+            const opt = document.createElement('option');
+            opt.value = tz.zone;
+            opt.textContent = tz.name;
+            sel.appendChild(opt);
+        });
+    }
+
+    function setNow() {
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const local = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        document.getElementById('master-time').value = local;
+        render();
+    }
+
+    function addTimezone() {
+        const sel = document.getElementById('tz-select');
+        const zone = sel.value;
+        const name = sel.options[sel.selectedIndex].textContent;
+        if (!activeZones.find(z => z.zone === zone)) {
+            activeZones.push({ name, zone });
+            render();
+        }
+    }
+
+    function removeZone(zone) {
+        activeZones = activeZones.filter(z => z.zone !== zone);
+        render();
+    }
+
+    function render() {
+        const masterVal = document.getElementById('master-time').value;
+        const refDate = masterVal ? new Date(masterVal) : new Date();
+        const grid = document.getElementById('tz-grid');
+        grid.innerHTML = '';
+
+        // Always show local first
+        const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const allZones = [
+            { name: 'Your Local Time', zone: localZone, isLocal: true },
+            ...activeZones.filter(z => z.zone !== localZone)
+        ];
+
+        allZones.forEach(tz => {
+            const timeStr = refDate.toLocaleTimeString('en-US', { timeZone: tz.zone, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = refDate.toLocaleDateString('en-US', { timeZone: tz.zone, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            const offsetStr = new Intl.DateTimeFormat('en', { timeZoneName: 'shortOffset', timeZone: tz.zone }).formatToParts(refDate).find(p => p.type === 'timeZoneName')?.value || '';
+
+            const card = document.createElement('div');
+            card.className = 'tz-card' + (tz.isLocal ? ' local' : '');
+            card.innerHTML = `
+                <div class="tz-info">
+                    <span class="tz-name">${tz.name} ${tz.isLocal ? '<span style="font-size:0.7rem; color:var(--accent); border:1px solid var(--accent); border-radius:4px; padding:1px 6px; margin-left:6px;">LOCAL</span>' : ''}</span>
+                    <span class="tz-zone">${tz.zone} · ${offsetStr}</span>
+                </div>
+                <div style="text-align:right">
+                    <div class="tz-time">${timeStr}</div>
+                    <div class="tz-date">${dateStr}</div>
+                </div>
+                ${!tz.isLocal ? `<button class="tz-remove" onclick="removeZone('${tz.zone}')"><i class="fas fa-times"></i></button>` : ''}
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    document.getElementById('master-time').addEventListener('input', render);
+
+    // Init
+    populateSelect();
+    setNow();
+    // Add a few defaults
+    activeZones = [
+        { name: "New York (EST/EDT)", zone: "America/New_York" },
+        { name: "London (GMT/BST)", zone: "Europe/London" },
+        { name: "Singapore (SGT)", zone: "Asia/Singapore" },
+    ];
+    render();
+</script>
+{{ end }}

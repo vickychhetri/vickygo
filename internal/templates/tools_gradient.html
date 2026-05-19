@@ -1,0 +1,116 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    @media (max-width: 800px) { .workspace { grid-template-columns: 1fr; } }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
+    
+    .preview-box { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 20px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+    
+    .code-box { background: var(--bg-main); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-primary); position: relative; }
+    
+    .form-group { margin-bottom: 25px; }
+    .form-group label { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--text-primary); font-weight: 500; }
+    
+    .slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--bg-main); border: 1px solid var(--border-color); outline: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+    
+    .color-picker-group { display: flex; gap: 20px; }
+    .color-picker { display: flex; flex-direction: column; flex: 1; gap: 8px;}
+    input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 50px; border-radius: 8px; cursor: pointer; padding: 0; background: none; }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border-color); border-radius: 8px; }
+    
+    .btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; margin-top: 15px;}
+    .btn:hover { opacity: 0.9; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1>CSS Gradient Generator</h1>
+        <p>Create beautiful linear gradients and instantly copy the cross-browser CSS code.</p>
+    </div>
+
+    <div class="workspace">
+        <div class="panel">
+            <div class="form-group">
+                <label>Angle <span id="val-angle">90°</span></label>
+                <input type="range" class="slider" id="inp-angle" min="0" max="360" value="90">
+            </div>
+            
+            <div class="color-picker-group">
+                <div class="color-picker">
+                    <label>Color 1</label>
+                    <input type="color" id="inp-c1" value="#4ade80">
+                    <input type="text" id="hex-c1" value="#4ade80" style="padding:8px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-main); color:var(--text-primary); text-align:center; font-family:var(--font-mono); outline:none;">
+                </div>
+                <div class="color-picker">
+                    <label>Color 2</label>
+                    <input type="color" id="inp-c2" value="#3b82f6">
+                    <input type="text" id="hex-c2" value="#3b82f6" style="padding:8px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-main); color:var(--text-primary); text-align:center; font-family:var(--font-mono); outline:none;">
+                </div>
+            </div>
+            
+            <button class="btn" style="background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary);" onclick="randomize()">
+                <i class="fas fa-random"></i> Random Gradient
+            </button>
+        </div>
+
+        <div>
+            <div class="preview-box" id="preview-box"></div>
+            <div class="code-box">
+                <span style="color:var(--text-secondary);">background:</span> <span id="code-str">linear-gradient(90deg, #4ade80, #3b82f6);</span>
+            </div>
+            <button class="btn" id="btn-copy"><i class="fas fa-copy"></i> Copy CSS</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const angle = document.getElementById('inp-angle');
+    const valAngle = document.getElementById('val-angle');
+    const c1 = document.getElementById('inp-c1');
+    const c2 = document.getElementById('inp-c2');
+    const hex1 = document.getElementById('hex-c1');
+    const hex2 = document.getElementById('hex-c2');
+    const preview = document.getElementById('preview-box');
+    const codeStr = document.getElementById('code-str');
+
+    function update() {
+        valAngle.textContent = angle.value + '°';
+        hex1.value = c1.value;
+        hex2.value = c2.value;
+        
+        const cssStr = `linear-gradient(${angle.value}deg, ${c1.value}, ${c2.value})`;
+        preview.style.background = cssStr;
+        codeStr.textContent = cssStr + ';';
+    }
+
+    function randomize() {
+        angle.value = Math.floor(Math.random() * 360);
+        c1.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        c2.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        update();
+    }
+
+    // Sync hex text inputs with color pickers
+    hex1.addEventListener('input', (e) => { if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { c1.value = e.target.value; update(); } });
+    hex2.addEventListener('input', (e) => { if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { c2.value = e.target.value; update(); } });
+
+    [angle, c1, c2].forEach(el => el.addEventListener('input', update));
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+        navigator.clipboard.writeText(`background: ${codeStr.textContent}`);
+        const btn = document.getElementById('btn-copy');
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy CSS', 2000);
+    });
+
+    update();
+</script>
+{{ end }}

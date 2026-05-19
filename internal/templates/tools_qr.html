@@ -1,0 +1,260 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .tool-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 40px;
+    }
+    .tool-header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--accent);
+    }
+    .tool-header p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .config-panel {
+        background: var(--bg-card);
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .preview-panel {
+        background: var(--bg-card);
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+    .tab {
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .tab.active {
+        background: rgba(45, 212, 191, 0.1);
+        color: var(--accent);
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 12px;
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: var(--text-primary);
+        outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+        border-color: var(--accent);
+    }
+    .btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        margin-top: 10px;
+    }
+    .btn:hover {
+        opacity: 0.9;
+    }
+    .btn-secondary {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        margin-top: 10px;
+    }
+    .qr-preview {
+        width: 250px;
+        height: 250px;
+        background: #fff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    .qr-preview img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .download-opts {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    @media (max-width: 900px) {
+        .tool-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="tool-container">
+    <div>
+        <div class="tool-header">
+            <h1>QR Code Generator</h1>
+            <p>Generate high-quality QR codes for URLs, WiFi networks, and UPI payments.</p>
+        </div>
+
+        <div class="config-panel">
+            <div class="tabs">
+                <div class="tab active" data-target="url-tab">URL / Text</div>
+                <div class="tab" data-target="wifi-tab">WiFi</div>
+                <div class="tab" data-target="upi-tab">UPI Payment</div>
+            </div>
+
+            <div id="url-tab" class="tab-content active">
+                <div class="form-group">
+                    <label>Website URL or Text</label>
+                    <input type="text" id="qr-text" placeholder="https://example.com" value="https://vickychhetri.com">
+                </div>
+            </div>
+
+            <div id="wifi-tab" class="tab-content">
+                <div class="form-group">
+                    <label>Network Name (SSID)</label>
+                    <input type="text" id="wifi-ssid" placeholder="My WiFi Network">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="wifi-pass" placeholder="SecretPassword">
+                </div>
+                <div class="form-group">
+                    <label>Security Type</label>
+                    <select id="wifi-type">
+                        <option value="WPA">WPA/WPA2</option>
+                        <option value="WEP">WEP</option>
+                        <option value="nopass">None</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="upi-tab" class="tab-content">
+                <div class="form-group">
+                    <label>UPI ID (VPA)</label>
+                    <input type="text" id="upi-id" placeholder="username@upi">
+                </div>
+                <div class="form-group">
+                    <label>Payee Name</label>
+                    <input type="text" id="upi-name" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Amount (Optional)</label>
+                    <input type="number" id="upi-amt" placeholder="100.00">
+                </div>
+            </div>
+            
+            <button class="btn" id="generate-btn">Generate QR Code</button>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <div class="qr-preview" id="qr-container">
+            <img id="qr-image" src="" style="display:none;" alt="QR Code">
+            <span id="qr-placeholder" style="color: #000;">Preview</span>
+        </div>
+        <div class="download-opts">
+            <button class="btn btn-secondary" id="dl-png" disabled><i class="fas fa-download"></i> PNG</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+        });
+    });
+
+    document.getElementById('generate-btn').addEventListener('click', async () => {
+        const activeTab = document.querySelector('.tab.active').dataset.target;
+        let data = "";
+        
+        if (activeTab === 'url-tab') {
+            data = document.getElementById('qr-text').value;
+        } else if (activeTab === 'wifi-tab') {
+            const ssid = document.getElementById('wifi-ssid').value;
+            const pass = document.getElementById('wifi-pass').value;
+            const type = document.getElementById('wifi-type').value;
+            data = `WIFI:T:${type};S:${ssid};P:${pass};;`;
+        } else if (activeTab === 'upi-tab') {
+            const id = document.getElementById('upi-id').value;
+            const name = document.getElementById('upi-name').value;
+            const amt = document.getElementById('upi-amt').value;
+            data = `upi://pay?pa=${id}&pn=${name}`;
+            if(amt) data += `&am=${amt}`;
+        }
+
+        if(!data) return alert("Please enter data");
+
+        try {
+            const res = await fetch('/api/qr', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: data })
+            });
+            const result = await res.json();
+            if(result.error) return alert(result.error);
+            
+            const img = document.getElementById('qr-image');
+            img.src = "data:image/png;base64," + result.base64;
+            img.style.display = "block";
+            document.getElementById('qr-placeholder').style.display = "none";
+            
+            const dlBtn = document.getElementById('dl-png');
+            dlBtn.disabled = false;
+            dlBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = 'qrcode.png';
+                a.click();
+            };
+        } catch(e) {
+            alert("Error generating QR code");
+        }
+    });
+</script>
+{{ end }}
