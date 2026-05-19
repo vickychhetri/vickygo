@@ -85,7 +85,7 @@
         document.getElementById('stand-name').textContent = name;
 
         try {
-            const res = await fetch('/api/qr', {
+            const res = await fetch('/api/qr/', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ data: data })

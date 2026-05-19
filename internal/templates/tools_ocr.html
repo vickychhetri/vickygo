@@ -1,0 +1,197 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Tesseract.js runs OCR entirely client-side using WebAssembly -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+    .tool-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2.2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 30px; }
+    
+    .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } }
+    
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    
+    .drop-zone {
+        border: 2px dashed var(--border-color); border-radius: 12px; padding: 40px 20px;
+        text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.01);
+        margin-bottom: 20px;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(45, 212, 191, 0.03); }
+    .drop-zone i { font-size: 3rem; color: var(--accent); margin-bottom: 15px; }
+    
+    .lang-select { width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; margin-bottom: 20px; font-size: 1rem; }
+    
+    .progress-container { display: none; flex-direction: column; margin: 20px 0; }
+    .progress-bar-wrap { width: 100%; height: 8px; background: var(--bg-main); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+    .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s; }
+    .progress-status { font-size: 0.9rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+    
+    .preview-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; align-items: center; justify-content: center; min-height: 250px; max-height: 350px; overflow: hidden; }
+    .preview-box img { max-width: 100%; max-height: 100%; border-radius: 4px; }
+    
+    textarea.ocr-result { width: 100%; flex: 1; min-height: 300px; background: var(--bg-main); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; font-size: 1rem; font-family: var(--font-sans); resize: vertical; outline: none; line-height: 1.6; }
+    textarea.ocr-result:focus { border-color: var(--accent); }
+    
+    .btn { padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+    .btn-secondary:hover { background: var(--bg-main); }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1><i class="fas fa-file-alt"></i> Image to Text (OCR)</h1>
+        <p>Extract editable text from images, screenshots, and scanned documents instantly using browser-based AI OCR.</p>
+    </div>
+
+    <div class="workspace">
+        <div class="panel">
+            <select class="lang-select" id="lang-select">
+                <option value="eng" selected>English Text Recognition</option>
+                <option value="hin">Hindi Text Recognition (हिन्दी)</option>
+                <option value="deu">German Text Recognition</option>
+                <option value="fra">French Text Recognition</option>
+                <option value="spa">Spanish Text Recognition</option>
+            </select>
+
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-file-image"></i>
+                <h3>Select or Drop Image</h3>
+                <p style="color: var(--text-secondary); margin-top: 5px;">PNG, JPG, JPEG, WebP</p>
+            </div>
+            <input type="file" id="file-input" style="display:none;" accept="image/*">
+
+            <div class="preview-box" id="preview-box" style="display: none;">
+                <img id="preview-img" alt="OCR Preview">
+            </div>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-status">
+                    <span id="progress-text">Initializing OCR engine...</span>
+                    <span id="progress-pct">0%</span>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Extracted Text</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" style="padding: 8px 14px;" id="copy-btn" disabled><i class="fas fa-copy"></i> Copy</button>
+                </div>
+            </div>
+            <textarea class="ocr-result" id="ocr-result" placeholder="Text recognized from the image will appear here..." readonly></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const langSelect = document.getElementById('lang-select');
+    const previewBox = document.getElementById('preview-box');
+    const previewImg = document.getElementById('preview-img');
+    const progressContainer = document.getElementById('progress-container');
+    const progressText = document.getElementById('progress-text');
+    const progressPct = document.getElementById('progress-pct');
+    const progressBar = document.getElementById('progress-bar');
+    const ocrResult = document.getElementById('ocr-result');
+    const copyBtn = document.getElementById('copy-btn');
+
+    // Drag events
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) handleImage(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleImage(file);
+    });
+
+    function handleImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            dropZone.style.display = 'none';
+            previewBox.style.display = 'flex';
+            performOCR(file);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function performOCR(file) {
+        progressContainer.style.display = 'flex';
+        ocrResult.value = "Recognizing text... please wait.";
+        copyBtn.disabled = true;
+
+        const lang = langSelect.value;
+
+        try {
+            // Run Tesseract OCR
+            const worker = await Tesseract.createWorker({
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        const pct = Math.round(m.progress * 100);
+                        progressText.textContent = "Analyzing pixels...";
+                        progressPct.textContent = pct + "%";
+                        progressBar.style.width = pct + "%";
+                    } else {
+                        progressText.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1) + "...";
+                        progressBar.style.width = "20%";
+                    }
+                }
+            });
+
+            // If lang is Hindi, load appropriate lang files
+            await worker.loadLanguage(lang);
+            await worker.initialize(lang);
+            
+            const { data: { text } } = await worker.recognize(file);
+            await worker.terminate();
+
+            progressContainer.style.display = 'none';
+            if (text.trim() === "") {
+                ocrResult.value = "No text found in this image. Ensure the image contains readable text.";
+            } else {
+                ocrResult.value = text;
+                copyBtn.disabled = false;
+            }
+
+        } catch (error) {
+            console.error(error);
+            ocrResult.value = "An error occurred during OCR recognition. Please try another image.";
+            progressContainer.style.display = 'none';
+        }
+    }
+
+    copyBtn.addEventListener('click', () => {
+        ocrResult.select();
+        navigator.clipboard.writeText(ocrResult.value);
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        }, 2000);
+    });
+</script>
+{{ end }}

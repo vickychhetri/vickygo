@@ -30,7 +30,7 @@
         <div class="expiry-banner" id="expiry-banner"></div>
         <div class="note-viewer" id="note-content"></div>
         <div class="controls" style="margin-top: 20px;">
-            <a href="/tools/notes" class="btn btn-copy"><i class="fas fa-plus"></i> Create New Note</a>
+            <a href="/tools/notes/" class="btn btn-copy"><i class="fas fa-plus"></i> Create New Note</a>
             <button class="btn btn-copy" onclick="copyNote()"><i class="fas fa-copy"></i> Copy Content</button>
         </div>
     </div>
@@ -62,7 +62,7 @@
         document.getElementById('create-mode').style.display = 'none';
         document.getElementById('view-mode').style.display = 'block';
         
-        fetch('/api/notes?id=' + noteId)
+        fetch('/api/notes/?id=' + noteId)
             .then(r => r.json())
             .then(data => {
                 if (data.error) {
@@ -86,7 +86,7 @@
         const btn = document.getElementById('share-btn');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         
-        const res = await fetch('/api/notes', {
+        const res = await fetch('/api/notes/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ content, expiry: document.getElementById('expiry-select').value })
@@ -97,7 +97,7 @@
         
         if (data.error) { alert(data.error); return; }
         
-        const link = window.location.origin + '/tools/notes?id=' + data.id;
+        const link = window.location.origin + '/tools/notes/?id=' + data.id;
         document.getElementById('share-link').textContent = link;
         document.getElementById('share-box').style.display = 'block';
     });

@@ -9,10 +9,14 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/skip2/go-qrcode"
 	"vickygo/internal/store"
 )
@@ -238,4 +242,180 @@ func HashApiHandler(w http.ResponseWriter, r *http.Request) {
 		"sha256": hex.EncodeToString(sha256Hash.Sum(nil)),
 		"sha512": hex.EncodeToString(sha512Hash.Sum(nil)),
 	})
+}
+
+// PDFMergeApiHandler handles merging multiple PDF files.
+func PDFMergeApiHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse multipart form
+	if err := r.ParseMultipartForm(50 << 20); err != nil { // 50MB max memory
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to parse form"})
+		return
+	}
+
+	files := r.MultipartForm.File["files"]
+	if len(files) < 2 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Please select at least 2 PDF files to merge"})
+		return
+	}
+
+	var tempFiles []string
+	defer func() {
+		// Clean up all temporary files
+		for _, f := range tempFiles {
+			os.Remove(f)
+		}
+	}()
+
+	for _, fileHeader := range files {
+		if filepath.Ext(fileHeader.Filename) != ".pdf" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Only PDF files are supported"})
+			return
+		}
+
+		file, err := fileHeader.Open()
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to open uploaded file"})
+			return
+		}
+		defer file.Close()
+
+		tempFile, err := os.CreateTemp("", "merge-*.pdf")
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create temporary file"})
+			return
+		}
+		tempFiles = append(tempFiles, tempFile.Name())
+		defer tempFile.Close()
+
+		if _, err := io.Copy(tempFile, file); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to write temporary file"})
+			return
+		}
+	}
+
+	outputTempFile, err := os.CreateTemp("", "merged-*.pdf")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create output temporary file"})
+		return
+	}
+	outputTempFileName := outputTempFile.Name()
+	outputTempFile.Close()
+	defer os.Remove(outputTempFileName)
+
+	// Merge files using pdfcpu
+	err = api.MergeCreateFile(tempFiles, outputTempFileName, false, nil)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to merge PDF files. Ensure files are not corrupted or password protected."})
+		return
+	}
+
+	// Serve the merged file
+	w.Header().Set("Content-Disposition", "attachment; filename=merged.pdf")
+	w.Header().Set("Content-Type", "application/pdf")
+	http.ServeFile(w, r, outputTempFileName)
+}
+
+// PDFPasswordApiHandler handles adding or removing password from PDF files.
+func PDFPasswordApiHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseMultipartForm(30 << 20); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to parse form"})
+		return
+	}
+
+	action := r.FormValue("action") // "add" or "remove"
+	password := r.FormValue("password")
+
+	if action != "add" && action != "remove" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid action. Must be 'add' or 'remove'"})
+		return
+	}
+
+	if password == "" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Password cannot be empty"})
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("file")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Please select a PDF file"})
+		return
+	}
+	defer file.Close()
+
+	if filepath.Ext(fileHeader.Filename) != ".pdf" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Only PDF files are supported"})
+		return
+	}
+
+	tempInput, err := os.CreateTemp("", "pass-input-*.pdf")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create temporary input file"})
+		return
+	}
+	tempInputName := tempInput.Name()
+	defer os.Remove(tempInputName)
+	defer tempInput.Close()
+
+	if _, err := io.Copy(tempInput, file); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to write temporary input file"})
+		return
+	}
+
+	tempOutput, err := os.CreateTemp("", "pass-output-*.pdf")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create temporary output file"})
+		return
+	}
+	tempOutputName := tempOutput.Name()
+	defer os.Remove(tempOutputName)
+	tempOutput.Close()
+
+	if action == "add" {
+		conf := model.NewAESConfiguration(password, password, 256)
+		err = api.EncryptFile(tempInputName, tempOutputName, conf)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encrypt PDF file. It might already be password protected."})
+			return
+		}
+	} else {
+		// Try to decrypt using the provided password
+		conf := model.NewAESConfiguration(password, password, 256)
+		err = api.DecryptFile(tempInputName, tempOutputName, conf)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to decrypt PDF. Please verify that the password is correct."})
+			return
+		}
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename=processed_"+fileHeader.Filename)
+	w.Header().Set("Content-Type", "application/pdf")
+	http.ServeFile(w, r, tempOutputName)
 }

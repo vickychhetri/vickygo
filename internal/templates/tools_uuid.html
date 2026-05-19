@@ -106,7 +106,7 @@
         const count = document.getElementById('uuid-count').value;
         
         try {
-            const res = await fetch(`/api/uuid?v=${version}&count=${count}`);
+            const res = await fetch(`/api/uuid/?v=${version}&count=${count}`);
             const data = await res.json();
             if(data.uuids) {
                 document.getElementById('uuid-list').value = data.uuids.join('\n');

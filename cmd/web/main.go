@@ -154,6 +154,26 @@ func main() {
 		render(w, "tools_timezone.html", "Timezone Converter", nil)
 	})
 
+	// PDF & File Utilities
+	http.HandleFunc("/tools/pdf-merge/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_pdf_merge.html", "PDF Merge Tool", nil)
+	})
+	http.HandleFunc("/tools/image-compressor/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_image_compressor.html", "Image Compressor", nil)
+	})
+	http.HandleFunc("/tools/heic-to-jpg/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_heic_to_jpg.html", "HEIC to JPG Converter", nil)
+	})
+	http.HandleFunc("/tools/ocr/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_ocr.html", "Image to Text (OCR)", nil)
+	})
+	http.HandleFunc("/tools/pdf-password/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_pdf_password.html", "PDF Password Protector", nil)
+	})
+	http.HandleFunc("/tools/signature-bg/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_signature_bg.html", "Signature Background Remover", nil)
+	})
+
 	// API Endpoints
 	http.HandleFunc("/api/qr/", handlers.QRApiHandler)
 	http.HandleFunc("/api/uuid/", handlers.UUIDApiHandler)
@@ -161,6 +181,8 @@ func main() {
 	http.HandleFunc("/api/notes/", handlers.NotesApiHandler)
 	http.HandleFunc("/api/secrets/", handlers.SecretApiHandler)
 	http.HandleFunc("/api/clipboard/", handlers.ClipboardApiHandler)
+	http.HandleFunc("/api/pdf/merge/", handlers.PDFMergeApiHandler)
+	http.HandleFunc("/api/pdf/password/", handlers.PDFPasswordApiHandler)
 
 	http.HandleFunc("/distributed-universe/", func(w http.ResponseWriter, r *http.Request) {
 		renderUniverse(w, "distributed-universe.html", "Distributed System Universe", nil)

@@ -117,7 +117,7 @@
         formData.append('data', data);
         
         try {
-            const res = await fetch('/api/hash', { method: 'POST', body: formData });
+            const res = await fetch('/api/hash/', { method: 'POST', body: formData });
             const result = await res.json();
             
             if(result.error) return alert(result.error);

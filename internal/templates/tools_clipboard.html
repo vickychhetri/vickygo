@@ -88,7 +88,7 @@
 
     async function pullContent() {
         if (!activePin) return;
-        const res = await fetch('/api/clipboard?pin=' + activePin);
+        const res = await fetch('/api/clipboard/?pin=' + activePin);
         const data = await res.json();
         if (data.content !== undefined) {
             const ta = document.getElementById('sync-text');
@@ -99,7 +99,7 @@
 
     async function pushContent() {
         if (!activePin) return;
-        await fetch('/api/clipboard', {
+        await fetch('/api/clipboard/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ pin: activePin, content: document.getElementById('sync-text').value })
