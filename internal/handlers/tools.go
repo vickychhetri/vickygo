@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -418,4 +419,106 @@ func PDFPasswordApiHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename=processed_"+fileHeader.Filename)
 	w.Header().Set("Content-Type", "application/pdf")
 	http.ServeFile(w, r, tempOutputName)
+}
+
+// ProxyApiHandler handles cross-origin API requests as a server-side proxy
+func ProxyApiHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
+		return
+	}
+
+	var req struct {
+		Method  string            `json:"method"`
+		URL     string            `json:"url"`
+		Headers map[string]string `json:"headers"`
+		Body    string            `json:"body"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
+		return
+	}
+
+	if req.URL == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "URL is required"})
+		return
+	}
+
+	if req.Method == "" {
+		req.Method = "GET"
+	}
+
+	// Create request body reader if body is provided
+	var bodyReader io.Reader
+	if req.Body != "" {
+		bodyReader = strings.NewReader(req.Body)
+	}
+
+	proxyReq, err := http.NewRequest(req.Method, req.URL, bodyReader)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create request: " + err.Error()})
+		return
+	}
+
+	// Set request headers
+	for k, v := range req.Headers {
+		proxyReq.Header.Set(k, v)
+	}
+
+	// Create http client with 15s timeout
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+
+	startTime := time.Now()
+	resp, err := client.Do(proxyReq)
+	duration := time.Since(startTime).Milliseconds()
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to connect to target URL: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to read response: " + err.Error()})
+		return
+	}
+
+	// Collect response headers
+	respHeaders := make(map[string]string)
+	for k, values := range resp.Header {
+		if len(values) > 0 {
+			respHeaders[k] = values[0]
+		}
+	}
+
+	// Prepare payload response
+	resPayload := struct {
+		Status     int               `json:"status"`
+		StatusText string            `json:"statusText"`
+		TimeMs     int64             `json:"timeMs"`
+		Headers    map[string]string `json:"headers"`
+		Body       string            `json:"body"`
+		Size       int               `json:"size"`
+	}{
+		Status:     resp.StatusCode,
+		StatusText: resp.Status,
+		TimeMs:     duration,
+		Headers:    respHeaders,
+		Body:       string(respBody),
+		Size:       len(respBody),
+	}
+
+	json.NewEncoder(w).Encode(resPayload)
 }

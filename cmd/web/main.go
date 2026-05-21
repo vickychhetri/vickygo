@@ -108,6 +108,9 @@ func main() {
 	http.HandleFunc("/tools/hash/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "tools_hash.html", "Hash Generator", nil)
 	})
+	http.HandleFunc("/tools/api-client/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_api_client.html", "API Client", nil)
+	})
 
 	// India Utilities
 	http.HandleFunc("/tools/upi/", func(w http.ResponseWriter, r *http.Request) {
@@ -170,8 +173,10 @@ func main() {
 	http.HandleFunc("/tools/pdf-password/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "tools_pdf_password.html", "PDF Password Protector", nil)
 	})
-	http.HandleFunc("/tools/signature-bg/", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "tools_signature_bg.html", "Signature Background Remover", nil)
+
+	// DB Admin Tool
+	http.HandleFunc("/tools/db/", func(w http.ResponseWriter, r *http.Request) {
+		render(w, "tools_db.html", "DB Admin", nil)
 	})
 
 	// API Endpoints
@@ -183,6 +188,24 @@ func main() {
 	http.HandleFunc("/api/clipboard/", handlers.ClipboardApiHandler)
 	http.HandleFunc("/api/pdf/merge/", handlers.PDFMergeApiHandler)
 	http.HandleFunc("/api/pdf/password/", handlers.PDFPasswordApiHandler)
+
+	// DB Admin API
+	http.HandleFunc("/api/db/connect", handlers.DBConnectHandler)
+	http.HandleFunc("/api/db/disconnect", handlers.DBDisconnectHandler)
+	http.HandleFunc("/api/db/databases", handlers.DBDatabasesHandler)
+	http.HandleFunc("/api/db/tables", handlers.DBTablesHandler)
+	http.HandleFunc("/api/db/objects", handlers.DBObjectsHandler)
+	http.HandleFunc("/api/db/status", handlers.DBStatusHandler)
+	http.HandleFunc("/api/db/row-update", handlers.DBRowUpdateHandler)
+	http.HandleFunc("/api/db/schema", handlers.DBSchemaHandler)
+	http.HandleFunc("/api/db/query", handlers.DBQueryHandler)
+	http.HandleFunc("/api/proxy", handlers.ProxyApiHandler)
+
+	// Demo REST API endpoints for learning
+	http.HandleFunc("/api/demo/users", handlers.DemoUsersHandler)
+	http.HandleFunc("/api/demo/users/", handlers.DemoUserHandler)
+	http.HandleFunc("/api/demo/auth/login", handlers.DemoAuthLoginHandler)
+	http.HandleFunc("/api/demo/products", handlers.DemoProductsHandler)
 
 	http.HandleFunc("/distributed-universe/", func(w http.ResponseWriter, r *http.Request) {
 		renderUniverse(w, "distributed-universe.html", "Distributed System Universe", nil)

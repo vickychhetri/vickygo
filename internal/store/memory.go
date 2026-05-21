@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"sync"
 	"time"
 )
@@ -26,6 +27,16 @@ type Clipboard struct {
 	LastAccess time.Time
 }
 
+// ---- DB Session ----
+
+type DBSession struct {
+	DB         *sql.DB
+	Driver     string
+	DSN        string
+	DBName     string
+	LastAccess time.Time
+}
+
 // ---- Memory Store ----
 
 type MemoryStore struct {
@@ -33,12 +44,14 @@ type MemoryStore struct {
 	notes      map[string]Note
 	secrets    map[string]Secret
 	clipboards map[string]Clipboard
+	dbSessions map[string]*DBSession
 }
 
 var Global = &MemoryStore{
 	notes:      make(map[string]Note),
 	secrets:    make(map[string]Secret),
 	clipboards: make(map[string]Clipboard),
+	dbSessions: make(map[string]*DBSession),
 }
 
 // StartGC starts a background goroutine to clean up expired entries every 5 minutes.
@@ -64,6 +77,13 @@ func (s *MemoryStore) StartGC() {
 			for pin, c := range s.clipboards {
 				if now.Sub(c.LastAccess) > 2*time.Hour {
 					delete(s.clipboards, pin)
+				}
+			}
+			// Expire DB sessions idle for more than 30 minutes
+			for id, sess := range s.dbSessions {
+				if now.Sub(sess.LastAccess) > 30*time.Minute {
+					sess.DB.Close()
+					delete(s.dbSessions, id)
 				}
 			}
 
@@ -129,4 +149,33 @@ func (s *MemoryStore) GetClipboard(pin string) (Clipboard, bool) {
 	c.LastAccess = time.Now()
 	s.clipboards[pin] = c
 	return c, true
+}
+
+// ---- DB Session Methods ----
+
+func (s *MemoryStore) SaveDBSession(id string, sess *DBSession) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sess.LastAccess = time.Now()
+	s.dbSessions[id] = sess
+}
+
+func (s *MemoryStore) GetDBSession(id string) (*DBSession, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sess, ok := s.dbSessions[id]
+	if !ok {
+		return nil, false
+	}
+	sess.LastAccess = time.Now()
+	return sess, true
+}
+
+func (s *MemoryStore) DeleteDBSession(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if sess, ok := s.dbSessions[id]; ok {
+		sess.DB.Close()
+		delete(s.dbSessions, id)
+	}
 }

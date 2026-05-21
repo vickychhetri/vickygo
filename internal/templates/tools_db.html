@@ -1,0 +1,1129 @@
+{{ define "content" }}
+<style>
+    main {
+    max-width: 100%;
+  }
+*{box-sizing:border-box}
+.db-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);min-height:650px;max-width:100%;padding:0 16px}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:22px 24px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:18px;margin-bottom:14px;box-shadow:0 18px 45px rgba(0,0,0,.05)}
+.page-header .title-group{max-width:68%}
+.page-header h1{margin:0;font-size:1.4rem;color:var(--text-primary);letter-spacing:.01em}
+.page-header p{margin:8px 0 0;color:var(--text-secondary);line-height:1.6;font-size:.96rem;max-width:680px}
+.page-header .status-group{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.page-header .status-group .tag{border-radius:999px;padding:10px 16px;font-size:.88rem}
+.conn-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 20px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:16px;margin-bottom:18px}
+.conn-bar select,.conn-bar input{padding:12px 14px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;font-size:.95rem;min-width:90px}
+.conn-bar select:focus,.conn-bar input:focus{outline:none;border-color:var(--accent)}
+.conn-bar input[name=host]{min-width:180px}
+.conn-bar input[name=dbname]{min-width:150px}
+.conn-bar input[name=pass]{min-width:150px}
+.cbtn{padding:10px 16px;border-radius:10px;border:none;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .2s}
+.cbtn-primary{background:var(--accent);color:#000}
+.cbtn-primary:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.cbtn-danger{background:#ef4444;color:#fff}
+.cbtn-danger:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.cbtn-outline{background:transparent;border:1px solid var(--border-color);color:var(--text-primary)}
+.cbtn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.status-bar{display:flex;align-items:center;gap:12px;font-size:.82rem;color:var(--text-secondary);padding:6px 0 10px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0}
+.status-dot.connected{background:#22c55e}
+.db-body{display:flex;gap:14px;flex:1;min-height:0}
+.sidebar{width:320px;min-width:260px;max-width:520px;flex-shrink:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.04)}
+.splitter{width:12px;cursor:col-resize;flex-shrink:0;background:linear-gradient(90deg, transparent 0%, rgba(45,212,191,.14) 50%, transparent 100%);border-radius:0 12px 12px 0;transition:background .2s}
+.splitter:hover{background:linear-gradient(90deg, transparent 0%, rgba(45,212,191,.24) 50%, transparent 100%)}
+.sidebar-title{padding:16px 18px;font-size:.88rem;font-weight:700;letter-spacing:.08em;color:var(--text-secondary);text-transform:uppercase;border-bottom:1px solid var(--border-color);background:var(--bg-main)}
+.sidebar-controls{display:flex;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border-color)}
+.sidebar-controls input{flex:1;padding:10px 14px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:12px;color:var(--text-primary);font-size:.92rem}
+.sidebar-scroll{flex:1;overflow-y:auto;padding:10px 8px}
+.sidebar-section{margin-bottom:16px}
+.sidebar-group{margin-top:10px}
+.sidebar-group-title{font-size:.82rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;padding:10px 14px}
+.sidebar-group-item{padding:10px 14px;border-radius:12px;cursor:pointer;font-size:.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:10px;transition:all .15s}
+.sidebar-group-item:hover{background:rgba(45,212,191,.08);color:var(--text-primary)}
+.sidebar-group-item.active{color:var(--accent);font-weight:600}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:999;}
+.modal{background:var(--bg-card);border:1px solid var(--border-color);border-radius:18px;box-shadow:0 28px 80px rgba(0,0,0,.25);max-width:760px;width:100%;padding:22px;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.modal-header h2{margin:0;font-size:1.1rem;color:var(--text-primary)}
+.modal-body{max-height:60vh;overflow:auto;}
+.modal-body label{display:block;margin-bottom:10px;font-size:.92rem;color:var(--text-secondary)}
+.modal-body input, .modal-body textarea, .modal-body select{width:100%;padding:12px 14px;margin-top:6px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-main);color:var(--text-primary);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.server-status-card{display:grid;grid-template-columns:1fr auto;gap:12px;padding:16px 18px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;margin-bottom:18px}
+.server-status-card strong{display:block;color:var(--text-primary);margin-bottom:4px}
+.server-status-row{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--text-secondary);}
+.server-status-row span{font-weight:700;color:var(--text-primary)}
+.db-item{padding:12px 14px;border-radius:12px;cursor:pointer;font-size:.92rem;color:var(--text-primary);display:flex;align-items:center;justify-content:space-between;gap:10px;transition:all .15s}
+.db-item:hover,.db-item.active{background:rgba(45,212,191,.12);color:var(--accent)}
+.db-item span{font-size:.82rem;color:var(--text-secondary)}
+.db-item i{font-size:.9rem;opacity:.75}
+.tbl-item{padding:10px 14px 10px 34px;border-radius:12px;cursor:pointer;font-size:.86rem;color:var(--text-secondary);display:flex;align-items:center;gap:10px;transition:all .15s}
+.tbl-item:hover{background:rgba(45,212,191,.08);color:var(--text-primary)}
+.tbl-item.active{color:var(--accent);font-weight:600}
+.main-panel{flex:1;display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;gap:6px;margin-bottom:12px;border-bottom:1px solid var(--border-color);padding-bottom:10px}
+.tab{padding:10px 18px;border-radius:12px 12px 0 0;cursor:pointer;font-size:.95rem;color:var(--text-secondary);font-weight:600;transition:all .15s}
+.tab.active{background:rgba(45,212,191,.12);color:var(--accent)}
+.tab-pane{display:none;flex:1;flex-direction:column;min-height:0}
+.tab-pane.active{display:flex}
+.query-area{width:100%;min-height:150px;max-height:280px;background:var(--bg-main);color:var(--text-primary);border:1px solid var(--border-color);border-radius:16px;padding:16px;font-family:'Courier New',monospace;font-size:.95rem;resize:vertical;line-height:1.7}
+.query-area:focus{outline:none;border-color:var(--accent)}
+.toolbar{display:flex;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.results-wrap{flex:1;overflow:auto;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;min-height:120px;padding:14px;box-shadow:0 18px 40px rgba(0,0,0,.04)}
+.results-table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:max-content}
+.results-table th{position:sticky;top:0;background:rgba(15,23,42,.95);color:var(--accent);padding:12px 14px;text-align:left;font-weight:700;border-bottom:1px solid var(--border-color);white-space:nowrap}
+.results-table td{padding:12px 14px;border-bottom:1px solid var(--border-color);color:var(--text-primary);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.results-table tr:hover td{background:rgba(45,212,191,.04)}
+.msg-box{padding:24px;text-align:center;color:var(--text-secondary);font-size:.95rem}
+.msg-box.error{color:#f87171}
+.msg-box.success{color:#4ade80}
+.info-row{display:flex;flex-wrap:wrap;gap:18px;font-size:.86rem;color:var(--text-secondary);padding:8px 0}
+.info-card{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:18px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:16px;margin-bottom:14px}
+.info-card strong{display:block;color:var(--text-primary);margin-bottom:4px}
+.info-card span{font-size:.92rem;color:var(--text-secondary)}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(45,212,191,.14);color:var(--accent);font-size:.82rem}
+.query-meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:.86rem;color:var(--text-secondary)}
+.star-help{font-size:.82rem;color:var(--text-secondary)}
+.history-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.history-item{padding:12px 14px;border-radius:14px;border:1px solid var(--border-color);background:var(--bg-main);cursor:pointer;color:var(--text-primary);font-size:.88rem;transition:all .15s}
+.history-item:hover{border-color:var(--accent);background:rgba(45,212,191,.08)}
+@media(max-width:1024px){.db-body{flex-direction:column}.sidebar{width:100%;max-height:340px}.conn-bar{flex-direction:column;align-items:stretch}.splitter{display:none}} 
+@media(max-width:720px){.info-card{grid-template-columns:1fr}.sidebar-controls{flex-direction:column;align-items:stretch}.toolbar{justify-content:flex-start}.page-header{flex-direction:column;align-items:flex-start}}
+</style>
+
+<div class="db-wrap">
+  <div class="page-header">
+    <div class="title-group">
+      <h1>Database Admin Console</h1>
+      <p>Professional browser-based database management for MySQL, PostgreSQL, and SQLite. Easily explore schemas, browse rows, run queries, and export results from one unified dashboard.</p>
+    </div>
+    <div class="status-group">
+      <span id="conn-badge" class="tag">Not connected</span>
+      <span id="conn-time">Ready to connect</span>
+      <span id="status-dot" class="status-dot"></span>
+      <span id="status-txt" class="tag" style="background:rgba(15,23,42,.08);color:var(--text-secondary);">Status panel</span>
+    </div>
+  </div>
+
+  <div class="conn-bar" aria-label="Database connection settings">
+    <select id="drv" title="Driver">
+      <option value="mysql">MySQL</option>
+      <option value="postgres">PostgreSQL</option>
+      <option value="sqlite">SQLite</option>
+    </select>
+    <input name="host" id="inp-host" placeholder="Host / File path" value="localhost" title="Host">
+    <input name="port" id="inp-port" placeholder="Port" value="3306" style="width:80px" title="Port">
+    <input name="user" id="inp-user" placeholder="User" value="root" title="User">
+    <input name="pass" id="inp-pass" placeholder="Password" type="password" title="Password">
+    <input name="dbname" id="inp-db" placeholder="Database" title="Database">
+    <button class="cbtn cbtn-primary" id="btn-connect"><i class="fas fa-sign-in-alt"></i> Login</button>
+    <button class="cbtn cbtn-danger" id="btn-disconnect" style="display:none"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <input type="file" id="csv-import-file" accept=".csv" style="display:none">
+  <input type="file" id="sql-import-file" accept=".sql,.txt" style="display:none">
+
+  <div class="server-status-card" id="server-status-card">
+    <div>
+      <strong>Server details</strong>
+      <div class="server-status-row"><span id="status-server-type">Driver</span> <span id="status-server-version">Version</span></div>
+      <div class="server-status-row"><span id="status-server-db">DB</span> <span id="status-server-host">Host</span></div>
+    </div>
+    <button class="cbtn cbtn-outline" id="btn-server-status">Refresh server status</button>
+  </div>
+
+  <div class="db-body">
+    <div class="sidebar" aria-label="Database explorer">
+      <div class="sidebar-title"><i class="fas fa-database" style="margin-right:10px"></i> Explorer</div>
+      <div class="sidebar-controls">
+        <input id="sidebar-search" placeholder="Search databases or tables" aria-label="Search explorer">
+        <button class="cbtn cbtn-outline" id="btn-refresh-explorer">Refresh</button>
+      </div>
+      <div class="sidebar-scroll" id="sidebar-content">
+        <div class="sidebar-section" id="sidebar-db-list"></div>
+        <div class="sidebar-section" id="sidebar-objects"></div>
+      </div>
+    </div>
+    <div class="splitter" id="sidebar-splitter" title="Drag to resize sidebar"></div>
+
+    <div class="main-panel">
+      <div class="tabs">
+        <div class="tab active" data-tab="query"><i class="fas fa-terminal" style="margin-right:8px"></i> Query</div>
+        <div class="tab" data-tab="browse"><i class="fas fa-table" style="margin-right:8px"></i> Browse</div>
+        <div class="tab" data-tab="structure"><i class="fas fa-sitemap" style="margin-right:8px"></i> Structure</div>
+      </div>
+
+      <div class="tab-pane active" id="pane-query">
+        <div class="toolbar">
+          <button class="cbtn cbtn-primary" id="btn-run"><i class="fas fa-play"></i> Run</button>
+          <button class="cbtn cbtn-outline" id="btn-clear-sql">Clear</button>
+          <button class="cbtn cbtn-outline" id="btn-use-table">Use table</button>
+          <button class="cbtn cbtn-outline" id="btn-count">Count</button>
+          <button class="cbtn cbtn-outline" id="btn-desc">Describe</button>
+          <button class="cbtn cbtn-outline" id="btn-ddl">DDL</button>
+          <button class="cbtn cbtn-outline" id="btn-new-table">New table</button>
+          <button class="cbtn cbtn-outline" id="btn-alter-table">Alter table</button>
+          <button class="cbtn cbtn-outline" id="btn-import-csv"><i class="fas fa-file-csv"></i> Import CSV</button>
+          <button class="cbtn cbtn-outline" id="btn-import-sql"><i class="fas fa-file-import"></i> Import SQL</button>
+          <button class="cbtn cbtn-outline" id="btn-explain">Explain</button>
+          <button class="cbtn cbtn-outline" id="btn-export-csv"><i class="fas fa-download"></i> CSV</button>
+          <label class="star-help">Ctrl+Enter to execute</label>
+          <label style="margin-left:auto;font-size:.88rem;color:var(--text-secondary);">Limit:
+            <select class="limit-sel" id="q-limit">
+              <option>100</option><option selected>500</option><option>1000</option><option>5000</option>
+            </select>
+          </label>
+        </div>
+        <textarea class="query-area" id="sql-editor" placeholder="SELECT * FROM your_table LIMIT 100;\n\n-- Use Ctrl+Enter to run"></textarea>
+        <div class="info-row" id="query-info"></div>
+        <div class="results-wrap" id="query-results">
+          <div class="msg-box">Results will appear here after executing a query.</div>
+        </div>
+        <div class="history-list" id="query-history"></div>
+      </div>
+
+      <div class="tab-pane" id="pane-browse">
+        <div class="toolbar">
+          <span id="browse-title" style="font-size:.95rem;color:var(--text-secondary)">Select a table from the explorer</span>
+          <input class="limit-sel" id="browse-filter" placeholder="Filter rows in page" style="min-width:180px">
+          <button class="cbtn cbtn-outline" id="btn-browse-prev" style="margin-left:auto">← Prev</button>
+          <span id="browse-page-info" style="font-size:.87rem;color:var(--text-secondary);padding:0 6px"></span>
+          <button class="cbtn cbtn-outline" id="btn-browse-next">Next →</button>
+          <button class="cbtn cbtn-outline" id="btn-browse-csv"><i class="fas fa-download"></i> CSV</button>
+        </div>
+        <div class="results-wrap" id="browse-results">
+          <div class="msg-box">Select a table to browse rows.</div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="pane-structure">
+        <div class="toolbar">
+          <span id="struct-title" style="font-size:.95rem;color:var(--text-secondary)">Select a table from the explorer</span>
+        </div>
+        <div class="results-wrap" id="struct-results">
+          <div class="msg-box">Table structure will appear here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="row-editor-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Edit row</h2>
+      <button class="cbtn cbtn-outline" id="btn-row-cancel">Cancel</button>
+    </div>
+    <div class="modal-body" id="row-editor-body"></div>
+    <div class="modal-actions">
+      <button class="cbtn cbtn-primary" id="btn-row-save">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = {
+  connect: '/api/db/connect',
+  disconnect: '/api/db/disconnect',
+  query: '/api/db/query',
+  objects: '/api/db/objects',
+  status: '/api/db/status',
+  rowUpdate: '/api/db/row-update',
+  tables: '/api/db/tables',
+  databases: '/api/db/databases',
+  schema: '/api/db/schema',
+};
+
+const STORAGE_KEY = 'db_admin_state';
+const HISTORY_KEY = 'db_admin_history';
+const BROWSE_LIMIT = 50;
+
+let state = {
+  session: '',
+  driver: 'mysql',
+  host: 'localhost',
+  port: '3306',
+  user: 'root',
+  dbname: '',
+  activeDB: '',
+  activeTable: '',
+  activeObjectType: 'table',
+  lastQueryData: null,
+  lastBrowseData: null,
+  browseSchema: [],
+  currentRowEdit: null,
+  queryHistory: [],
+};
+
+const drv = document.getElementById('drv');
+const hostInput = document.getElementById('inp-host');
+const portInput = document.getElementById('inp-port');
+const userInput = document.getElementById('inp-user');
+const passInput = document.getElementById('inp-pass');
+const dbInput = document.getElementById('inp-db');
+const btnConnect = document.getElementById('btn-connect');
+const btnDisconnect = document.getElementById('btn-disconnect');
+const btnRefresh = document.getElementById('btn-refresh-explorer');
+const btnRun = document.getElementById('btn-run');
+const btnClearSql = document.getElementById('btn-clear-sql');
+const btnExportCsv = document.getElementById('btn-export-csv');
+const btnImportCsv = document.getElementById('btn-import-csv');
+const btnImportSQL = document.getElementById('btn-import-sql');
+const csvImportFile = document.getElementById('csv-import-file');
+const sqlImportFile = document.getElementById('sql-import-file');
+const btnNewTable = document.getElementById('btn-new-table');
+const btnAlterTable = document.getElementById('btn-alter-table');
+const btnUseTable = document.getElementById('btn-use-table');
+const btnCount = document.getElementById('btn-count');
+const btnDesc = document.getElementById('btn-desc');
+const btnDDL = document.getElementById('btn-ddl');
+const btnExplain = document.getElementById('btn-explain');
+const btnServerStatus = document.getElementById('btn-server-status');
+const btnBrowsePrev = document.getElementById('btn-browse-prev');
+const btnBrowseNext = document.getElementById('btn-browse-next');
+const btnBrowseCsv = document.getElementById('btn-browse-csv');
+const browseFilter = document.getElementById('browse-filter');
+const sidebarSearch = document.getElementById('sidebar-search');
+const statusDot = document.getElementById('status-dot');
+const statusTxt = document.getElementById('status-txt');
+const connBadge = document.getElementById('conn-badge');
+const connTime = document.getElementById('conn-time');
+const statusServerType = document.getElementById('status-server-type');
+const statusServerVersion = document.getElementById('status-server-version');
+const statusServerDB = document.getElementById('status-server-db');
+const statusServerHost = document.getElementById('status-server-host');
+const sidebar = document.getElementById('sidebar-content');
+const sidebarSplitter = document.getElementById('sidebar-splitter');
+const dbBody = document.querySelector('.db-body');
+const rowEditorModal = document.getElementById('row-editor-modal');
+const rowEditorBody = document.getElementById('row-editor-body');
+const btnRowSave = document.getElementById('btn-row-save');
+const btnRowCancel = document.getElementById('btn-row-cancel');
+const sqlEditor = document.getElementById('sql-editor');
+const queryResults = document.getElementById('query-results');
+const queryInfo = document.getElementById('query-info');
+const browseResults = document.getElementById('browse-results');
+const structResults = document.getElementById('struct-results');
+const queryHistoryEl = document.getElementById('query-history');
+
+let browseOffset = 0;
+let explorerList = [];
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    state = {...state, ...saved};
+    state.queryHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (err) {
+    state.queryHistory = [];
+  }
+}
+
+function saveState() {
+  const {session, driver, host, port, user, dbname, activeDB, activeTable, activeObjectType} = state;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({session, driver, host, port, user, dbname, activeDB, activeTable, activeObjectType}));
+}
+
+function saveQueryHistory(sql) {
+  const trimmed = sql.trim();
+  if (!trimmed) return;
+  state.queryHistory = [trimmed, ...state.queryHistory.filter(item => item !== trimmed)].slice(0, 8);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.queryHistory));
+  renderQueryHistory();
+}
+
+function renderQueryHistory() {
+  if (!state.queryHistory.length) {
+    queryHistoryEl.innerHTML = '<div class="msg-box">Recent queries will appear here.</div>';
+    return;
+  }
+  queryHistoryEl.innerHTML = state.queryHistory.map(sql => `<div class="history-item" data-sql="${sql.replace(/"/g,'&quot;')}">${sql.length > 64 ? sql.slice(0, 64) + '…' : sql}</div>`).join('');
+  queryHistoryEl.querySelectorAll('.history-item').forEach(item => item.addEventListener('click', () => {
+    sqlEditor.value = item.dataset.sql;
+    switchTab('query');
+  }));
+}
+
+function updateDriverFields() {
+  const ports = {mysql:'3306', postgres:'5432', sqlite:''};
+  if (drv.value === 'sqlite') {
+    hostInput.placeholder = 'File path (:memory:)';
+    hostInput.value = hostInput.value || ':memory:';
+    portInput.disabled = true;
+    userInput.disabled = true;
+    passInput.disabled = true;
+  } else {
+    hostInput.placeholder = 'Host';
+    portInput.disabled = false;
+    userInput.disabled = false;
+    passInput.disabled = false;
+  }
+  portInput.value = ports[drv.value] || '';
+}
+
+function setConnected(info) {
+  statusDot.className = 'status-dot connected';
+  statusTxt.textContent = `Connected: ${info.driver} · ${info.dbname || 'default'}`;
+  connBadge.textContent = `Connected · ${info.driver}`;
+  connTime.textContent = `Active DB: ${info.dbname || '(default)'}`;
+  btnConnect.style.display = 'none';
+  btnDisconnect.style.display = '';
+  btnRefresh.disabled = false;
+  btnRun.disabled = false;
+  btnUseTable.disabled = false;
+  btnCount.disabled = false;
+  btnDesc.disabled = false;
+  btnExplain.disabled = false;
+  btnExportCsv.disabled = false;
+  btnBrowseCsv.disabled = false;
+  loadServerStatus();
+}
+
+function setDisconnected() {
+  statusDot.className = 'status-dot';
+  statusTxt.textContent = 'Not connected — Login to continue';
+  connBadge.textContent = 'Not connected';
+  connTime.textContent = 'Ready to login';
+  btnConnect.style.display = '';
+  btnDisconnect.style.display = 'none';
+  btnRefresh.disabled = true;
+  btnRun.disabled = true;
+  btnUseTable.disabled = true;
+  btnCount.disabled = true;
+  btnDesc.disabled = true;
+  btnExplain.disabled = true;
+  btnExportCsv.disabled = true;
+  btnBrowseCsv.disabled = true;
+  sidebar.innerHTML = '<div class="msg-box">Login to a database to explore.</div>';
+  queryResults.innerHTML = '<div class="msg-box">Results will appear here after executing a query.</div>';
+  browseResults.innerHTML = '<div class="msg-box">Select a table to browse rows.</div>';
+  structResults.innerHTML = '<div class="msg-box">Table structure will appear here.</div>';
+  statusServerType.textContent = 'Not connected';
+  statusServerVersion.textContent = '';
+  statusServerDB.textContent = '';
+  statusServerHost.textContent = '';
+  sqlEditor.value = '';
+  queryInfo.innerHTML = '';
+  state.session = '';
+  state.activeDB = '';
+  state.activeTable = '';
+  saveState();
+}
+
+async function headers() {
+  return {'Content-Type':'application/json', 'X-DB-Session': state.session};
+}
+
+function quoteIdentifier(name) {
+  if (!name) return '';
+  if (state.driver === 'postgres' || state.driver === 'sqlite') {
+    return '"' + name.replace(/"/g, '""') + '"';
+  }
+  return '`' + name.replace(/`/g, '``') + '`';
+}
+
+function tableReference(tbl) {
+  if (!tbl) return '';
+  if (state.driver === 'mysql' && state.activeDB) {
+    return `${quoteIdentifier(state.activeDB)}.${quoteIdentifier(tbl)}`;
+  }
+  return quoteIdentifier(tbl);
+}
+
+function filterExplorer() {
+  const query = sidebarSearch.value.trim().toLowerCase();
+  document.querySelectorAll('.db-item, .sidebar-group-item').forEach(item => {
+    item.style.display = query ? (item.textContent.toLowerCase().includes(query) ? '' : 'none') : '';
+  });
+}
+
+function renderExplorer(databases) {
+  explorerList = databases || [];
+  if (!explorerList.length) {
+    sidebar.innerHTML = '<div class="msg-box">No databases detected.</div>';
+    return;
+  }
+  sidebar.innerHTML = `
+    <div class="sidebar-section" id="sidebar-db-list"></div>
+    <div class="sidebar-section" id="sidebar-objects"></div>
+  `;
+  const dbList = document.getElementById('sidebar-db-list');
+  explorerList.forEach(db => {
+    const dbRow = document.createElement('div');
+    dbRow.className = 'db-item';
+    dbRow.innerHTML = `<span><i class="fas fa-database"></i> ${db}</span>`;
+    dbRow.addEventListener('click', () => {
+      state.activeDB = db;
+      saveState();
+      document.querySelectorAll('.db-item').forEach(e => e.classList.remove('active'));
+      dbRow.classList.add('active');
+      loadObjects(db);
+    });
+    dbList.appendChild(dbRow);
+  });
+  if (state.activeDB && explorerList.includes(state.activeDB)) {
+    const active = Array.from(dbList.querySelectorAll('.db-item')).find(item => item.textContent.includes(state.activeDB));
+    if (active) active.click();
+  } else if (dbList.firstChild) {
+    dbList.firstChild.click();
+  }
+}
+
+async function loadObjects(db) {
+  if (!state.session || !db) return;
+  state.activeDB = db;
+  saveState();
+  const objectsContainer = document.getElementById('sidebar-objects');
+  objectsContainer.innerHTML = '<div class="msg-box">Loading schema objects…</div>';
+  const r = await fetch(`${API.objects}?db=${encodeURIComponent(db)}`, {headers: await headers()});
+  const d = await r.json();
+  if (d.error) {
+    objectsContainer.innerHTML = `<div class="msg-box error">${d.error}</div>`;
+    return;
+  }
+  objectsContainer.innerHTML = '';
+  const groups = [
+    {title:'Tables', items:d.tables || [], icon:'fa-table', type:'table'},
+    {title:'Views', items:d.views || [], icon:'fa-eye', type:'view'},
+    {title:'Procedures', items:d.procedures || [], icon:'fa-cog', type:'procedure'},
+  ];
+  groups.forEach(group => {
+    if (!group.items.length) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'sidebar-group';
+    wrapper.innerHTML = `<div class="sidebar-group-title">${group.title}</div>`;
+    group.items.forEach(item => {
+      const obj = document.createElement('div');
+      obj.className = 'sidebar-group-item';
+      obj.innerHTML = `<i class="fas ${group.icon}"></i> ${item}`;
+      obj.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-group-item').forEach(i => i.classList.remove('active'));
+        obj.classList.add('active');
+        state.activeObjectType = group.type;
+        if (group.type === 'procedure') {
+          state.activeTable = '';
+          saveState();
+          if (state.driver === 'postgres') {
+            sqlEditor.value = `CALL ${quoteIdentifier(item)}();`;
+          } else if (state.driver === 'mysql') {
+            sqlEditor.value = `CALL ${quoteIdentifier(item)}();`;
+          } else {
+            sqlEditor.value = `SELECT '${item}';`;
+          }
+          switchTab('query');
+          return;
+        }
+        state.activeTable = item;
+        saveState();
+        selectTable(item);
+      });
+      wrapper.appendChild(obj);
+    });
+    objectsContainer.appendChild(wrapper);
+  });
+}
+
+let isResizingSidebar = false;
+
+sidebarSplitter?.addEventListener('mousedown', e => {
+  isResizingSidebar = true;
+  document.body.style.cursor = 'col-resize';
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isResizingSidebar) return;
+  const rect = dbBody.getBoundingClientRect();
+  const newWidth = Math.max(240, Math.min(520, e.clientX - rect.left));
+  const sidebarEl = document.querySelector('.sidebar');
+  if (sidebarEl) sidebarEl.style.width = `${newWidth}px`;
+});
+
+document.addEventListener('mouseup', () => {
+  if (!isResizingSidebar) return;
+  isResizingSidebar = false;
+  document.body.style.cursor = '';
+});
+
+async function loadDatabases() {
+  const r = await fetch(API.databases, {headers: await headers()});
+  const d = await r.json();
+  if (d.error) {
+    sidebar.innerHTML = `<div class="msg-box error">${d.error}</div>`;
+    return;
+  }
+  renderExplorer(d.databases || []);
+  filterExplorer();
+}
+
+async function loadObjects(db) {
+  if (!state.session || !db) return;
+  state.activeDB = db;
+  saveState();
+  const objectsContainer = document.getElementById('sidebar-objects');
+  objectsContainer.innerHTML = '<div class="msg-box">Loading schema objects…</div>';
+  const r = await fetch(`${API.objects}?db=${encodeURIComponent(db)}`, {headers: await headers()});
+  const d = await r.json();
+  if (d.error) {
+    objectsContainer.innerHTML = `<div class="msg-box error">${d.error}</div>`;
+    return;
+  }
+  objectsContainer.innerHTML = '';
+  const groups = [
+    {title:'Tables', items:d.tables || [], icon:'fa-table', type:'table'},
+    {title:'Views', items:d.views || [], icon:'fa-eye', type:'view'},
+    {title:'Procedures', items:d.procedures || [], icon:'fa-cog', type:'procedure'},
+  ];
+  groups.forEach(group => {
+    if (!group.items.length) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'sidebar-group';
+    wrapper.innerHTML = `<div class="sidebar-group-title">${group.title}</div>`;
+    group.items.forEach(item => {
+      const obj = document.createElement('div');
+      obj.className = 'sidebar-group-item';
+      obj.innerHTML = `<i class="fas ${group.icon}"></i> ${item}`;
+      obj.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-group-item').forEach(i => i.classList.remove('active'));
+        obj.classList.add('active');
+        state.activeObjectType = group.type;
+        if (group.type === 'procedure') {
+          state.activeTable = '';
+          saveState();
+          if (state.driver === 'postgres' || state.driver === 'mysql') {
+            sqlEditor.value = `CALL ${quoteIdentifier(item)}();`;
+          } else {
+            sqlEditor.value = `SELECT '${item}';`;
+          }
+          switchTab('query');
+          return;
+        }
+        state.activeTable = item;
+        saveState();
+        selectTable(item);
+      });
+      wrapper.appendChild(obj);
+    });
+    objectsContainer.appendChild(wrapper);
+  });
+}
+
+function selectTable(tbl) {
+  state.activeTable = tbl;
+  saveState();
+  document.getElementById('browse-title').textContent = tbl;
+  document.getElementById('struct-title').textContent = tbl;
+  loadBrowse();
+  loadStructure();
+  switchTab('browse');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + name));
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => switchTab(t.dataset.tab));
+});
+
+function renderTable(columns, rows, container, options = {}) {
+  if (!columns || !columns.length) {
+    container.innerHTML = '<div class="msg-box">No data returned.</div>';
+    return;
+  }
+  const editable = options.editable === true;
+  const header = `<table class="results-table"><thead><tr>${editable ? '<th></th>' : ''}${columns.map(c => `<th title="${c}">${c}</th>`).join('')}</tr></thead><tbody>`;
+  const body = rows.map((row, rowIndex) => {
+    const cells = columns.map(c => {
+      const v = row[c];
+      if (v === null || v === undefined) return '<td class="null-val">NULL</td>';
+      const text = String(v);
+      return `<td title="${text.replace(/"/g,'&quot;')}">${text.length > 120 ? text.slice(0,120) + '…' : text}</td>`;
+    }).join('');
+    const action = editable ? `<td><button class="cbtn cbtn-outline btn-row-edit" data-row="${rowIndex}">Edit</button></td>` : '';
+    return `<tr>${action}${cells}</tr>`;
+  }).join('');
+  container.innerHTML = `${header}${body}</tbody></table>`;
+  if (editable) {
+    container.querySelectorAll('.btn-row-edit').forEach(button => {
+      button.addEventListener('click', () => {
+        const index = Number(button.dataset.row);
+        openRowEditor(rows[index], columns);
+      });
+    });
+  }
+}
+
+function closeRowEditor() {
+  rowEditorModal.style.display = 'none';
+  rowEditorBody.innerHTML = '';
+  state.currentRowEdit = null;
+}
+
+function openRowEditor(row, columns) {
+  state.currentRowEdit = {original: row, table: state.activeTable, db: state.activeDB, columns};
+  rowEditorBody.innerHTML = columns.map(col => {
+    const value = row[col];
+    const display = value === null || value === undefined ? '' : String(value);
+    return `<label>${col}<textarea data-col="${col}" rows="1">${display.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea></label>`;
+  }).join('');
+  rowEditorModal.style.display = 'flex';
+}
+
+async function saveRowEdits() {
+  if (!state.currentRowEdit) return;
+  const inputs = rowEditorBody.querySelectorAll('[data-col]');
+  const changes = {};
+  const original = state.currentRowEdit.original;
+  inputs.forEach(input => {
+    const col = input.dataset.col;
+    const value = input.value;
+    const originalValue = original[col] === null || original[col] === undefined ? '' : String(original[col]);
+    if (value !== originalValue) {
+      changes[col] = value === '' ? null : value;
+    }
+  });
+  if (!Object.keys(changes).length) {
+    alert('No changes were made.');
+    return;
+  }
+  try {
+    const r = await fetch(API.rowUpdate, {
+      method: 'POST',
+      headers: await headers(),
+      body: JSON.stringify({
+        db: state.activeDB,
+        table: state.activeTable,
+        original,
+        changes,
+      }),
+    });
+    const d = await r.json();
+    if (d.error) {
+      alert('Update failed: ' + d.error);
+      return;
+    }
+    closeRowEditor();
+    alert('Row updated successfully');
+    loadBrowse();
+    loadStructure();
+  } catch (err) {
+    alert('Update failed: ' + err.message);
+  }
+}
+
+async function loadServerStatus() {
+  if (!state.session) {
+    statusServerType.textContent = 'Not connected';
+    statusServerVersion.textContent = '';
+    statusServerDB.textContent = '';
+    statusServerHost.textContent = '';
+    return;
+  }
+  try {
+    const r = await fetch(API.status, {headers: await headers()});
+    const d = await r.json();
+    if (d.error) {
+      statusServerType.textContent = 'Error';
+      statusServerVersion.textContent = d.error;
+      statusServerDB.textContent = '';
+      statusServerHost.textContent = '';
+      return;
+    }
+    statusServerType.textContent = d.driver || 'Unknown';
+    statusServerVersion.textContent = d.version || 'Unknown version';
+    statusServerDB.textContent = d.currentDB || '(none)';
+    statusServerHost.textContent = d.host || '(host)';
+  } catch (err) {
+    statusServerType.textContent = 'Error';
+    statusServerVersion.textContent = err.message;
+    statusServerDB.textContent = '';
+    statusServerHost.textContent = '';
+  }
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      if (inQuotes && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (ch === ',' && !inQuotes) {
+      row.push(field);
+      field = '';
+      continue;
+    }
+    if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      row.push(field);
+      field = '';
+      if (row.length > 1 || row[0] !== '') {
+        rows.push(row);
+      }
+      row = [];
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      continue;
+    }
+    field += ch;
+  }
+  if (field !== '' || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows.map(r => r.map(cell => cell.replace(/^"|"$/g, '')));
+}
+
+function escapeSqlValue(val) {
+  if (val === null) return 'NULL';
+  const s = String(val).replace(/'/g, "''");
+  return `'${s}'`;
+}
+
+async function importCSVData(text) {
+  if (!state.activeTable) return alert('Select a table first');
+  const rows = parseCSV(text).filter(row => row.length);
+  if (rows.length < 2) return alert('CSV file must contain a header row and at least one data row.');
+  const columns = rows[0].map(h => h.trim()).filter(Boolean);
+  if (!columns.length) return alert('Unable to parse CSV header.');
+  const values = rows.slice(1).map(row => `(${row.map((cell, idx) => escapeSqlValue(cell === undefined ? '' : cell)).join(',')})`);
+  if (!values.length) return alert('No data rows found.');
+  const sql = `INSERT INTO ${tableReference(state.activeTable)} (${columns.map(quoteIdentifier).join(', ')}) VALUES ${values.join(', ')};`;
+  if (!confirm(`Import ${values.length} rows into ${state.activeTable}?`)) return;
+  sqlEditor.value = sql;
+  switchTab('query');
+}
+
+async function importSQLData(text) {
+  if (!text.trim()) return alert('SQL file is empty');
+  sqlEditor.value = text;
+  switchTab('query');
+}
+
+async function runQuery() {
+  if (!state.session) { alert('Not connected'); return; }
+  const sql = sqlEditor.value.trim();
+  if (!sql) { alert('Enter a SQL statement'); return; }
+  const limit = parseInt(document.getElementById('q-limit').value, 10) || 500;
+  queryResults.innerHTML = '<div class="msg-box">Running query…</div>';
+  queryInfo.innerHTML = '';
+  try {
+    const r = await fetch(API.query, {
+      method: 'POST',
+      headers: await headers(),
+      body: JSON.stringify({sql, limit}),
+    });
+    const d = await r.json();
+    if (d.error) {
+      queryResults.innerHTML = `<div class="msg-box error">Error: ${d.error}</div>`;
+      return;
+    }
+    saveQueryHistory(sql);
+    if (d.columns) {
+      state.lastQueryData = d;
+      renderTable(d.columns, d.rows, queryResults);
+      queryInfo.innerHTML = `<span>${d.count} row(s)</span><span>·</span><span>${d.timeMs} ms</span>`;
+    } else {
+      state.lastQueryData = null;
+      queryResults.innerHTML = `<div class="msg-box success">${d.message}</div>`;
+      queryInfo.innerHTML = `<span>${d.timeMs} ms</span>`;
+      if (state.activeDB) loadObjects(state.activeDB);
+    }
+  } catch (err) {
+    queryResults.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+  }
+}
+
+btnRun.addEventListener('click', runQuery);
+btnClearSql.addEventListener('click', () => {
+  sqlEditor.value = '';
+  queryResults.innerHTML = '<div class="msg-box">Results will appear here after executing a query.</div>';
+  queryInfo.innerHTML = '';
+});
+btnUseTable.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  sqlEditor.value = `SELECT * FROM ${tableReference(state.activeTable)} LIMIT 100;`;
+  switchTab('query');
+});
+
+btnCount.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  sqlEditor.value = `SELECT COUNT(*) AS total_rows FROM ${tableReference(state.activeTable)};`;
+  switchTab('query');
+});
+
+btnDesc.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  if (state.driver === 'sqlite') {
+    sqlEditor.value = `PRAGMA table_info(${tableReference(state.activeTable)});`;
+  } else if (state.driver === 'postgres') {
+    sqlEditor.value = `SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_name = '${state.activeTable}' ORDER BY ordinal_position;`;
+  } else {
+    sqlEditor.value = `DESCRIBE ${tableReference(state.activeTable)};`;
+  }
+  switchTab('query');
+});
+
+btnDDL.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  if (state.driver === 'sqlite') {
+    sqlEditor.value = `SELECT sql FROM sqlite_master WHERE type='table' AND name='${state.activeTable}';`;
+  } else if (state.driver === 'postgres') {
+    sqlEditor.value = `SELECT 'CREATE TABLE ' || quote_ident(table_name) || E' (\n' || string_agg('    ' || quote_ident(column_name) || ' ' || data_type || coalesce('(' || character_maximum_length || ')', '') || case when is_nullable = 'NO' then ' NOT NULL' else '' end, ',\n') || E'\n);' AS ddl
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = '${state.activeTable}'
+GROUP BY table_name;`;
+  } else {
+    sqlEditor.value = `SHOW CREATE TABLE ${tableReference(state.activeTable)};`;
+  }
+  switchTab('query');
+});
+
+btnExplain.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  if (state.driver === 'sqlite') {
+    sqlEditor.value = `EXPLAIN QUERY PLAN SELECT * FROM ${tableReference(state.activeTable)} LIMIT 10;`;
+  } else {
+    sqlEditor.value = `EXPLAIN SELECT * FROM ${tableReference(state.activeTable)} LIMIT 10;`;
+  }
+  switchTab('query');
+});
+
+btnNewTable.addEventListener('click', () => {
+  sqlEditor.value = `CREATE TABLE ${tableReference('new_table')} (\n  id INT PRIMARY KEY,\n  name VARCHAR(255) NOT NULL\n);`;
+  switchTab('query');
+});
+
+btnAlterTable.addEventListener('click', () => {
+  if (!state.activeTable) return alert('Select a table first');
+  sqlEditor.value = `ALTER TABLE ${tableReference(state.activeTable)} ADD COLUMN new_column VARCHAR(255);`;
+  switchTab('query');
+});
+
+btnImportCsv.addEventListener('click', () => csvImportFile.click());
+btnImportSQL.addEventListener('click', () => sqlImportFile.click());
+btnServerStatus.addEventListener('click', loadServerStatus);
+
+csvImportFile.addEventListener('change', async () => {
+  const file = csvImportFile.files?.[0];
+  if (!file) return;
+  const text = await file.text();
+  await importCSVData(text);
+  csvImportFile.value = '';
+});
+
+sqlImportFile.addEventListener('change', async () => {
+  const file = sqlImportFile.files?.[0];
+  if (!file) return;
+  const text = await file.text();
+  await importSQLData(text);
+  sqlImportFile.value = '';
+});
+
+btnRowCancel.addEventListener('click', closeRowEditor);
+btnRowSave.addEventListener('click', saveRowEdits);
+
+sqlEditor.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runQuery();
+  }
+  if (e.key === 'F5') {
+    e.preventDefault();
+    runQuery();
+  }
+});
+window.addEventListener('keydown', e => {
+  if (e.key === 'F5' && document.activeElement !== sqlEditor) {
+    e.preventDefault();
+    runQuery();
+  }
+});
+
+async function loadBrowse() {
+  if (!state.activeTable || !state.session) return;
+  browseFilter.value = '';
+  browseResults.innerHTML = '<div class="msg-box">Loading rows…</div>';
+  const sql = `SELECT * FROM ${tableReference(state.activeTable)} LIMIT ${BROWSE_LIMIT} OFFSET ${browseOffset}`;
+  try {
+    const r = await fetch(API.query, {method:'POST', headers: await headers(), body: JSON.stringify({sql, limit:BROWSE_LIMIT})});
+    const d = await r.json();
+    if (d.error) {
+      browseResults.innerHTML = `<div class="msg-box error">${d.error}</div>`;
+      return;
+    }
+    state.lastBrowseData = d;
+    renderTable(d.columns, d.rows, browseResults, {editable: true});
+    const page = Math.floor(browseOffset / BROWSE_LIMIT) + 1;
+    document.getElementById('browse-page-info').textContent = `Page ${page} · ${d.count} rows`;
+  } catch (err) {
+    browseResults.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+  }
+}
+
+btnBrowsePrev.addEventListener('click', () => {
+  if (browseOffset === 0) return;
+  browseOffset = Math.max(0, browseOffset - BROWSE_LIMIT);
+  loadBrowse();
+});
+btnBrowseNext.addEventListener('click', () => {
+  browseOffset += BROWSE_LIMIT;
+  loadBrowse();
+});
+
+browseFilter.addEventListener('input', () => {
+  const query = browseFilter.value.trim().toLowerCase();
+  document.querySelectorAll('#browse-results tbody tr').forEach(row => {
+    row.style.display = !query || row.textContent.toLowerCase().includes(query) ? '' : 'none';
+  });
+});
+
+async function loadStructure() {
+  if (!state.activeTable || !state.session) return;
+  if (state.driver === 'mysql' && !state.activeDB) {
+    structResults.innerHTML = '<div class="msg-box error">No database selected. Choose a database from the explorer first.</div>';
+    return;
+  }
+  structResults.innerHTML = '<div class="msg-box">Loading table structure…</div>';
+  try {
+    const url = new URL(API.schema, window.location.origin);
+    url.searchParams.set('table', state.activeTable);
+    if (state.activeDB) {
+      url.searchParams.set('db', state.activeDB);
+    }
+    const r = await fetch(url.toString(), {headers: await headers()});
+    const d = await r.json();
+    if (d.error) {
+      structResults.innerHTML = `<div class="msg-box error">${d.error}</div>`;
+      return;
+    }
+    const cols = d.columns || [];
+    if (!cols.length) {
+      structResults.innerHTML = '<div class="msg-box">No structure information available.</div>';
+      return;
+    }
+    structResults.innerHTML = `<table class="results-table"><thead><tr><th>Name</th><th>Type</th><th>Nullable</th><th>Key</th><th>Default</th><th>Extra</th></tr></thead><tbody>${cols.map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.type}</td><td>${c.nullable}</td><td>${c.key || ''}</td><td>${c.default || ''}</td><td>${c.extra || ''}</td></tr>`).join('')}</tbody></table>`;
+  } catch (err) {
+    structResults.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+  }
+}
+
+function toCSV(columns, rows) {
+  const escapeValue = val => {
+    if (val === null || val === undefined) return '';
+    const s = String(val);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const header = columns.map(escapeValue).join(',');
+  const lines = rows.map(row => columns.map(c => escapeValue(row[c])).join(','));
+  return [header, ...lines].join('\n');
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+btnExportCsv.addEventListener('click', () => {
+  if (!state.lastQueryData || !state.lastQueryData.columns) return alert('No query results to export');
+  downloadCSV(toCSV(state.lastQueryData.columns, state.lastQueryData.rows), 'query-results.csv');
+});
+
+btnBrowseCsv.addEventListener('click', () => {
+  if (!state.lastBrowseData || !state.lastBrowseData.columns) return alert('No browse data to export');
+  downloadCSV(toCSV(state.lastBrowseData.columns, state.lastBrowseData.rows), `${state.activeTable || 'table'}.csv`);
+});
+
+sidebarSearch.addEventListener('input', filterExplorer);
+btnRefresh.addEventListener('click', () => {
+  if (!state.session) return;
+  loadDatabases();
+});
+
+drv.addEventListener('change', () => {
+  state.driver = drv.value;
+  updateDriverFields();
+  saveState();
+});
+
+btnConnect.addEventListener('click', async () => {
+  const body = {
+    driver: drv.value,
+    host: hostInput.value,
+    port: portInput.value,
+    user: userInput.value,
+    pass: passInput.value,
+    dbname: dbInput.value,
+  };
+  btnConnect.disabled = true;
+  btnConnect.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting';
+  try {
+    const r = await fetch(API.connect, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const d = await r.json();
+    if (d.error) {
+      alert('Connection failed: ' + d.error);
+      return;
+    }
+    state.session = d.session;
+    state.driver = d.driver;
+    state.dbname = d.dbname || body.dbname;
+    state.host = body.host;
+    state.port = body.port;
+    state.user = body.user;
+    state.activeDB = state.dbname;
+    saveState();
+    setConnected(d);
+    await loadDatabases();
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btnConnect.disabled = false;
+    btnConnect.innerHTML = '<i class="fas fa-plug"></i> Connect';
+  }
+});
+
+btnDisconnect.addEventListener('click', async () => {
+  try {
+    await fetch(API.disconnect, {method:'DELETE', headers: await headers()});
+  } catch (err) {
+    console.warn(err);
+  }
+  setDisconnected();
+});
+
+(async function init() {
+  loadState();
+  drv.value = state.driver;
+  hostInput.value = state.host;
+  portInput.value = state.port;
+  userInput.value = state.user;
+  dbInput.value = state.dbname;
+  updateDriverFields();
+  renderQueryHistory();
+  if (state.session) {
+    try {
+      setConnected({driver: state.driver, dbname: state.dbname});
+      await loadDatabases();
+    } catch (err) {
+      setDisconnected();
+    }
+  } else {
+    setDisconnected();
+  }
+})();
+</script>
+{{ end }}

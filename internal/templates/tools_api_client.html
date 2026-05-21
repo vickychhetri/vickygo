@@ -1,0 +1,474 @@
+{{ define "content" }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        main {
+    max-width: 100%;
+  }
+    .tool-container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    .tool-header h1 { font-size: 2.2rem; margin-bottom: 10px; color: var(--accent); }
+    .tool-header p { color: var(--text-secondary); margin-bottom: 18px; }
+    .sample-panel { margin-bottom: 24px; display: grid; gap: 14px; }
+    .sample-list { display: grid; gap: 12px; }
+    .sample-card { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-main); }
+    .sample-card .sample-meta { display: grid; gap: 4px; min-width: 220px; }
+    .sample-card .sample-title { font-weight: 700; color: var(--text-primary); }
+    .sample-card .sample-desc { color: var(--text-secondary); font-size: .88rem; }
+    .sample-card button { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); cursor: pointer; transition: all .2s; }
+    .sample-card button:hover { background: rgba(45,212,191,.08); border-color: var(--accent); color: var(--accent); }
+
+    .panel { background: var(--bg-card); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color); }
+    
+    /* Postman interface structure */
+    .request-bar { display: flex; gap: 15px; margin-bottom: 25px; }
+    
+    .method-select { 
+        width: 140px; padding: 14px; background: var(--bg-main); border: 1px solid var(--border-color); 
+        border-radius: 8px; color: var(--text-primary); outline: none; font-size: 1rem; font-weight: 700; 
+        cursor: pointer; text-align: center;
+    }
+    .method-select option[value="GET"] { color: #3b82f6; }
+    .method-select option[value="POST"] { color: #10b981; }
+    .method-select option[value="PUT"] { color: #f59e0b; }
+    .method-select option[value="DELETE"] { color: #ef4444; }
+    .method-select option[value="PATCH"] { color: #8b5cf6; }
+    
+    .url-input { 
+        flex: 1; padding: 14px 20px; background: var(--bg-main); border: 1px solid var(--border-color); 
+        border-radius: 8px; color: var(--text-primary); outline: none; font-size: 1rem; font-family: monospace;
+    }
+    .url-input:focus { border-color: var(--accent); }
+    
+    .btn-send { 
+        padding: 14px 35px; background: var(--accent); color: #000; border: none; border-radius: 8px; 
+        font-weight: 700; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; 
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-send:hover { opacity: 0.9; }
+    .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    /* Tabs styling */
+    .postman-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; gap: 20px; }
+    .postman-tab { 
+        padding: 10px 5px; color: var(--text-secondary); cursor: pointer; font-weight: 600; 
+        font-size: 0.95rem; border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .postman-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    
+    .tab-content { display: none; margin-bottom: 25px; }
+    .tab-content.active { display: block; }
+    
+    /* Key-Value Editor */
+    .kv-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+    .kv-row { display: grid; grid-template-columns: 1fr 1fr 45px; gap: 12px; align-items: center; }
+    .kv-row input { 
+        padding: 10px 15px; background: var(--bg-main); border: 1px solid var(--border-color); 
+        border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.9rem;
+    }
+    .kv-row input:focus { border-color: var(--accent); }
+    .btn-remove-row { 
+        background: transparent; border: none; color: var(--text-muted); cursor: pointer; 
+        font-size: 1.15rem; transition: color 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-remove-row:hover { color: #ef4444; }
+    .btn-add-row { 
+        align-self: flex-start; padding: 8px 16px; background: transparent; border: 1px dashed var(--border-color); 
+        border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; font-weight: 600;
+        transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-add-row:hover { border-color: var(--accent); color: var(--accent); background: rgba(45, 212, 191, 0.02); }
+    
+    /* Body area */
+    .body-textarea { 
+        width: 100%; height: 180px; background: var(--bg-main); border: 1px solid var(--border-color); 
+        border-radius: 8px; color: var(--text-primary); padding: 15px; outline: none; 
+        font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.5; resize: vertical;
+    }
+    .body-textarea:focus { border-color: var(--accent); }
+    
+    /* Response Panel */
+    .response-section { margin-top: 35px; border-top: 1px solid var(--border-color); padding-top: 30px; display: none; }
+    
+    .response-meta { 
+        display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-bottom: 20px; 
+        font-size: 0.9rem; color: var(--text-secondary);
+    }
+    .meta-pill { 
+        padding: 6px 14px; border-radius: 30px; background: var(--bg-main); border: 1px solid var(--border-color); 
+        font-weight: 600; display: flex; align-items: center; gap: 6px;
+    }
+    .meta-pill.status-green { color: #10b981; border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05); }
+    .meta-pill.status-red { color: #ef4444; border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); }
+    
+    .response-body-wrap { position: relative; }
+    .pre-response { 
+        background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; 
+        color: #e2e8f0; font-family: monospace; font-size: 0.95rem; line-height: 1.6; 
+        overflow: auto; max-height: 500px; min-height: 150px; white-space: pre-wrap; word-break: break-all;
+    }
+    .btn-copy { 
+        position: absolute; right: 15px; top: 15px; padding: 8px 12px; background: rgba(255,255,255,0.05); 
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #94a3b8; cursor: pointer; 
+        font-size: 0.8rem; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-copy:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    
+    /* Headers list */
+    .headers-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .headers-table th, .headers-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+    .headers-table th { color: var(--text-secondary); font-weight: 600; }
+    .headers-table td:first-child { font-weight: 600; color: var(--accent); width: 30%; }
+    .headers-table td:last-child { color: var(--text-primary); font-family: monospace; }
+</style>
+
+<div class="tool-container">
+    <div class="tool-header">
+        <h1><i class="fas fa-paper-plane" style="margin-right:8px;"></i> API Client</h1>
+        <p>A fast, fully featured Postman alternative. Test external or local HTTP endpoints with headers, raw JSON bodies, and full CORS bypass capability.</p>
+    </div>
+
+    <div class="sample-panel">
+        <h2 style="margin:0; color: var(--accent);">Sample REST APIs</h2>
+        <p style="margin:0;color:var(--text-secondary);">Use these demo endpoints to practice GET, POST, PUT, DELETE, authentication, and payload handling.</p>
+        <div class="sample-list">
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">List demo users</div>
+                    <div class="sample-desc">GET /api/demo/users</div>
+                </div>
+                <button type="button" class="sample-load" data-method="GET" data-url="/api/demo/users" data-body="">Load</button>
+            </div>
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">Create demo user</div>
+                    <div class="sample-desc">POST /api/demo/users</div>
+                </div>
+                <button type="button" class="sample-load" data-method="POST" data-url="/api/demo/users" data-body='{"name":"New User","email":"new.user@example.com","role":"editor"}'>Load</button>
+            </div>
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">Update demo user</div>
+                    <div class="sample-desc">PUT /api/demo/users/1</div>
+                </div>
+                <button type="button" class="sample-load" data-method="PUT" data-url="/api/demo/users/1" data-body='{"name":"Alice Updated","role":"admin"}'>Load</button>
+            </div>
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">Delete demo user</div>
+                    <div class="sample-desc">DELETE /api/demo/users/1</div>
+                </div>
+                <button type="button" class="sample-load" data-method="DELETE" data-url="/api/demo/users/1" data-body="">Load</button>
+            </div>
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">Login to demo API</div>
+                    <div class="sample-desc">POST /api/demo/auth/login</div>
+                </div>
+                <button type="button" class="sample-load" data-method="POST" data-url="/api/demo/auth/login" data-body='{"email":"alice@example.com","password":"password"}'>Load</button>
+            </div>
+            <div class="sample-card">
+                <div class="sample-meta">
+                    <div class="sample-title">List demo products</div>
+                    <div class="sample-desc">GET /api/demo/products</div>
+                </div>
+                <button type="button" class="sample-load" data-method="GET" data-url="/api/demo/products" data-body="">Load</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <form id="api-form">
+            <div class="request-bar">
+                <select class="method-select" id="req-method">
+                    <option value="GET" selected>GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="PATCH">PATCH</option>
+                </select>
+                <input type="url" class="url-input" id="req-url" placeholder="Enter Request URL (e.g. https://api.github.com/users/octocat)" required>
+                <button type="submit" class="btn-send" id="btn-send">
+                    <span>Send</span> <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <div class="postman-tabs">
+                <div class="postman-tab active" data-target="tab-headers">Headers</div>
+                <div class="postman-tab" data-target="tab-body" id="tab-body-trigger">Body</div>
+            </div>
+
+            <!-- Headers Tab Content -->
+            <div class="tab-content active" id="tab-headers">
+                <div class="kv-grid" id="headers-grid">
+                    <div class="kv-row">
+                        <input type="text" placeholder="Key" class="header-key" value="Accept">
+                        <input type="text" placeholder="Value" class="header-val" value="application/json">
+                        <button type="button" class="btn-remove-row"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-row" id="btn-add-header"><i class="fas fa-plus"></i> Add Header</button>
+            </div>
+
+            <!-- Body Tab Content -->
+            <div class="tab-content" id="tab-body">
+                <textarea class="body-textarea" id="req-body" placeholder='{\n  "key": "value"\n}'></textarea>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;"><i class="fas fa-info-circle"></i> Input raw JSON, XML, or Text. Format is automatically parsed by the target server.</p>
+            </div>
+        </form>
+
+        <!-- Response Section -->
+        <div class="response-section" id="response-section">
+            <h3 style="margin-bottom: 20px;">Response</h3>
+            
+            <div class="response-meta">
+                <div class="meta-pill" id="resp-status">-</div>
+                <div class="meta-pill"><i class="fas fa-clock"></i> <span id="resp-time">0 ms</span></div>
+                <div class="meta-pill"><i class="fas fa-hdd"></i> <span id="resp-size">0 B</span></div>
+            </div>
+
+            <div class="postman-tabs">
+                <div class="postman-tab active" data-target="resp-tab-body">Response Body</div>
+                <div class="postman-tab" data-target="resp-tab-headers">Headers (<span id="resp-headers-count">0</span>)</div>
+            </div>
+
+            <!-- Response Body Tab Content -->
+            <div class="tab-content active" id="resp-tab-body">
+                <div class="response-body-wrap">
+                    <button class="btn-copy" id="btn-copy-response"><i class="fas fa-copy"></i> Copy</button>
+                    <pre class="pre-response" id="resp-body-content"></pre>
+                </div>
+            </div>
+
+            <!-- Response Headers Tab Content -->
+            <div class="tab-content" id="resp-tab-headers">
+                <table class="headers-table">
+                    <thead>
+                        <tr>
+                            <th>Header</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resp-headers-body">
+                        <!-- Headers populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab Swapping
+    document.querySelectorAll('.postman-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Find parent tabs container to avoid bleeding between request and response tabs
+            const parent = tab.parentElement;
+            parent.querySelectorAll('.postman-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Toggle corresponding contents
+            const targetId = tab.dataset.target;
+            // Get all siblings of the targets
+            if (targetId.startsWith('resp-')) {
+                document.getElementById('resp-tab-body').classList.remove('active');
+                document.getElementById('resp-tab-headers').classList.remove('active');
+            } else {
+                document.getElementById('tab-headers').classList.remove('active');
+                document.getElementById('tab-body').classList.remove('active');
+            }
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
+    // Color code method dropdown on select
+    const methodSelect = document.getElementById('req-method');
+    const updateMethodColor = () => {
+        const colors = {
+            'GET': '#3b82f6',
+            'POST': '#10b981',
+            'PUT': '#f59e0b',
+            'DELETE': '#ef4444',
+            'PATCH': '#8b5cf6'
+        };
+        methodSelect.style.color = colors[methodSelect.value] || 'var(--text-primary)';
+        
+        // Auto show/hide body reminder
+        const tabBodyTrigger = document.getElementById('tab-body-trigger');
+        if (methodSelect.value === 'GET') {
+            tabBodyTrigger.style.opacity = '0.5';
+            tabBodyTrigger.title = "GET requests typically don't have bodies";
+        } else {
+            tabBodyTrigger.style.opacity = '1';
+            tabBodyTrigger.title = "";
+        }
+    };
+    methodSelect.addEventListener('change', updateMethodColor);
+    updateMethodColor();
+
+    // Headers grid adder/remover
+    const headersGrid = document.getElementById('headers-grid');
+    const btnAddHeader = document.getElementById('btn-add-header');
+
+    const createHeaderRow = (key = '', val = '') => {
+        const row = document.createElement('div');
+        row.className = 'kv-row';
+        row.innerHTML = `
+            <input type="text" placeholder="Key" class="header-key" value="${key}">
+            <input type="text" placeholder="Value" class="header-val" value="${val}">
+            <button type="button" class="btn-remove-row"><i class="fas fa-trash-alt"></i></button>
+        `;
+        row.querySelector('.btn-remove-row').addEventListener('click', () => {
+            row.remove();
+        });
+        headersGrid.appendChild(row);
+    };
+
+    // Bind remove event on original rows
+    headersGrid.querySelectorAll('.btn-remove-row').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.currentTarget.parentElement.remove();
+        });
+    });
+
+    btnAddHeader.addEventListener('click', () => createHeaderRow());
+
+    // Submit form -> call Go Proxy API
+    const apiForm = document.getElementById('api-form');
+    const btnSend = document.getElementById('btn-send');
+    const responseSection = document.getElementById('response-section');
+
+    const respStatus = document.getElementById('resp-status');
+    const respTime = document.getElementById('resp-time');
+    const respSize = document.getElementById('resp-size');
+    const respBodyContent = document.getElementById('resp-body-content');
+    const respHeadersBody = document.getElementById('resp-headers-body');
+    const respHeadersCount = document.getElementById('resp-headers-count');
+    const btnCopyResponse = document.getElementById('btn-copy-response');
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    document.querySelectorAll('.sample-load').forEach(button => {
+        button.addEventListener('click', () => {
+            const method = button.dataset.method;
+            const url = button.dataset.url;
+            const body = button.dataset.body || '';
+            methodSelect.value = method;
+            updateMethodColor();
+            document.getElementById('req-url').value = url;
+            document.getElementById('req-body').value = body;
+            if (method !== 'GET') {
+                document.getElementById('tab-body').classList.add('active');
+                document.querySelectorAll('.postman-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('[data-target="tab-body"]').classList.add('active');
+                document.getElementById('tab-headers').classList.remove('active');
+            }
+        });
+    });
+
+    apiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        btnSend.disabled = true;
+        btnSend.innerHTML = `Sending... <i class="fas fa-spinner fa-spin"></i>`;
+        responseSection.style.display = 'none';
+
+        // Extract headers
+        const headers = {};
+        headersGrid.querySelectorAll('.kv-row').forEach(row => {
+            const key = row.querySelector('.header-key').value.trim();
+            const val = row.querySelector('.header-val').value.trim();
+            if (key) {
+                headers[key] = val;
+            }
+        });
+
+        const method = methodSelect.value;
+        const url = document.getElementById('req-url').value.trim();
+        const body = document.getElementById('req-body').value;
+
+        try {
+            const res = await fetch('/api/proxy/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    method,
+                    url,
+                    headers,
+                    body: (method !== 'GET') ? body : ''
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || "Failed to make request via proxy.");
+                return;
+            }
+
+            const data = await res.json();
+            
+            // Show response panel
+            responseSection.style.display = 'block';
+
+            // Status Badge
+            respStatus.textContent = `${data.status} ${data.statusText || ''}`;
+            respStatus.className = 'meta-pill';
+            if (data.status >= 200 && data.status < 300) {
+                respStatus.classList.add('status-green');
+            } else {
+                respStatus.classList.add('status-red');
+            }
+
+            // Latency & Size
+            respTime.textContent = `${data.timeMs} ms`;
+            respSize.textContent = formatBytes(data.size);
+
+            // Response Body
+            let bodyText = data.body;
+            try {
+                // Prettify JSON if response is JSON
+                const parsed = JSON.parse(data.body);
+                bodyText = JSON.stringify(parsed, null, 2);
+            } catch (err) {}
+            respBodyContent.textContent = bodyText || '[Empty Response]';
+
+            // Response Headers
+            respHeadersBody.innerHTML = '';
+            let hCount = 0;
+            for (const [key, value] of Object.entries(data.headers)) {
+                hCount++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${key}</td>
+                    <td>${value}</td>
+                `;
+                respHeadersBody.appendChild(tr);
+            }
+            respHeadersCount.textContent = hCount;
+
+        } catch (error) {
+            console.error(error);
+            alert("Error sending request through the proxy server.");
+        } finally {
+            btnSend.disabled = false;
+            btnSend.innerHTML = `<span>Send</span> <i class="fas fa-paper-plane"></i>`;
+        }
+    });
+
+    // Copy Response Body
+    btnCopyResponse.addEventListener('click', () => {
+        const text = respBodyContent.textContent;
+        navigator.clipboard.writeText(text);
+        btnCopyResponse.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            btnCopyResponse.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        }, 2000);
+    });
+</script>
+{{ end }}

@@ -1,0 +1,353 @@
+{{ define "content" }}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  .main {
+    width: 100%;
+  }
+  .invoice-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .invoice-container h1 {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .form-group textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .items-table th {
+    background: #f5f5f5;
+  }
+
+  .items-table th,
+  .items-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+
+  .items-table input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  .add-item {
+    margin-top: 10px;
+    display: inline-block;
+    cursor: pointer;
+    color: #0d6efd;
+    font-weight: 600;
+  }
+
+  .add-item:hover {
+    opacity: 0.8;
+  }
+
+  .btn {
+    background: #0d6efd;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 20px;
+  }
+
+  .btn:hover {
+    background: #0b5ed7;
+  }
+
+  .remove-btn {
+    color: red;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media(max-width:768px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="invoice-container">
+
+  <h1>Invoice Generator</h1>
+
+  <div class="grid-2">
+
+    <div>
+
+      <div class="form-group">
+        <label>Freelancer Name</label>
+        <input type="text" id="freelancer-name" placeholder="Your Name">
+      </div>
+
+      <div class="form-group">
+        <label>Freelancer Email</label>
+        <input type="email" id="freelancer-email" placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>Freelancer Address</label>
+        <textarea id="freelancer-address" placeholder="Your address"></textarea>
+      </div>
+
+    </div>
+
+    <div>
+
+      <div class="form-group">
+        <label>Client Name</label>
+        <input type="text" id="client-name" placeholder="Client Name">
+      </div>
+
+      <div class="form-group">
+        <label>Client Email</label>
+        <input type="email" id="client-email" placeholder="client@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>Client Address</label>
+        <textarea id="client-address" placeholder="Client address"></textarea>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="form-group">
+
+    <label>Invoice Items</label>
+
+    <table class="items-table" id="items-table">
+
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th width="100">Qty</th>
+          <th width="150">Price</th>
+          <th width="80">Action</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+
+    </table>
+
+    <div class="add-item" onclick="addItemRow()">
+      <i class="fas fa-plus"></i>
+      Add Item
+    </div>
+
+  </div>
+
+  <div class="grid-2">
+
+    <div class="form-group">
+      <label>Tax (%)</label>
+      <input type="number" id="tax" min="0" step="0.01" value="0">
+    </div>
+
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="notes" placeholder="Additional notes"></textarea>
+    </div>
+
+  </div>
+
+  <button class="btn" onclick="generateInvoice()">
+    <i class="fas fa-file-pdf"></i>
+    Generate PDF
+  </button>
+
+</div>
+
+<script>
+
+  function addItemRow() {
+
+    const tbody = document
+      .querySelector('#items-table tbody');
+
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>
+            <input type="text"
+            placeholder="Item description">
+        </td>
+
+        <td>
+            <input type="number"
+            min="1"
+            value="1">
+        </td>
+
+        <td>
+            <input type="number"
+            min="0"
+            step="0.01"
+            value="0">
+        </td>
+
+        <td style="text-align:center;">
+            <span class="remove-btn"
+            onclick="removeRow(this)">
+                <i class="fas fa-trash"></i>
+            </span>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+  }
+
+  function removeRow(el) {
+    el.closest('tr').remove();
+  }
+
+  async function generateInvoice() {
+
+    const data = {
+
+      freelancer: {
+        name: document.getElementById('freelancer-name').value,
+        email: document.getElementById('freelancer-email').value,
+        address: document.getElementById('freelancer-address').value
+      },
+
+      client: {
+        name: document.getElementById('client-name').value,
+        email: document.getElementById('client-email').value,
+        address: document.getElementById('client-address').value
+      },
+
+      tax: parseFloat(
+        document.getElementById('tax').value
+      ) || 0,
+
+      items: [],
+
+      notes: document.getElementById('notes').value
+    };
+
+    document
+      .querySelectorAll('#items-table tbody tr')
+      .forEach(tr => {
+
+        const cols = tr.querySelectorAll('input');
+
+        data.items.push({
+          desc: cols[0].value,
+          qty: parseInt(cols[1].value) || 1,
+          price: parseFloat(cols[2].value) || 0
+        });
+
+      });
+
+    if (data.items.length === 0) {
+      alert('Please add at least one item');
+      return;
+    }
+
+    try {
+
+      const response = await fetch('/api/invoice/', {
+
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify(data)
+
+      });
+
+      if (!response.ok) {
+
+        const txt = await response.text();
+
+        alert('Error: ' + txt);
+
+        return;
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = 'invoice.pdf';
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert('Failed to generate invoice');
+
+    }
+
+  }
+
+  // default row
+  addItemRow();
+
+</script>
+
+{{ end }}

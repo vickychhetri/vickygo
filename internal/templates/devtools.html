@@ -1,6 +1,9 @@
 {{ define "content" }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+        main {
+    max-width: 100%;
+  }
     .tools-dashboard {
         max-width: 1200px;
         margin: 0 auto;
@@ -123,6 +126,16 @@
     </div>
 
     <div class="tools-grid">
+        <a href="/tools/api-client/" class="tool-card">
+            <div class="tool-icon" style="color: #6366f1; background: rgba(99, 102, 241, 0.1);"><i class="fas fa-paper-plane"></i></div>
+            <h3 class="tool-title">API Client (Postman)</h3>
+            <p class="tool-desc">Test HTTP/HTTPS endpoints. Add custom headers and request bodies with a secure server proxy to bypass CORS.</p>
+            <div class="tool-tags">
+                <span class="tool-tag">Go Proxy</span>
+                <span class="tool-tag">Rest API</span>
+            </div>
+        </a>
+
         <a href="/tools/qr/" class="tool-card">
             <div class="tool-icon"><i class="fas fa-qrcode"></i></div>
             <h3 class="tool-title">QR Code Generator</h3>
